@@ -199,7 +199,7 @@ const app = {
                 this.users = [
                     { username: 'admin', password: 'password', role: 'admin', fullname: 'Admin Mobile Unit 10', status: 'approved' },
                     { username: 'lab', password: 'password', role: 'lab', fullname: 'นสพ.วิทยา รักดี', status: 'approved' },
-                    { username: 'certifier', password: 'password', role: 'certifier', fullname: 'ดร.ผู้รับรอง ตรวจสอบดี', status: 'approved' },
+                    { username: 'certifier', password: 'Certifier@2027!', role: 'certifier', fullname: 'ดร.ผู้รับรอง ตรวจสอบดี', status: 'approved' },
                     { username: 'user', password: 'password', role: 'collector', fullname: 'นายสมคิด สุขใจ', status: 'approved' },
                     { username: 'anchasa', password: 'anchasa@241138', role: 'collector', fullname: 'นางสาว อัญชสา ใจดี', status: 'approved', workplace: 'รพ.ศรีสะเกษ', province: 'ศรีสะเกษ', createdAt: new Date().toISOString() }
                 ];

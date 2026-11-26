@@ -378,6 +378,50 @@ const app = {
         } catch (e) {
             this.currentUser = null;
         }
+
+        // Initialize and migrate user accounts
+        try {
+            let storedUsers = localStorage.getItem('sskmoph_users');
+            if (!storedUsers) {
+                this.users = [
+                    { username: 'admin', password: 'password', role: 'admin', fullname: 'Admin Mobile Unit 10', status: 'approved' },
+                    { username: 'lab', password: 'password', role: 'lab', fullname: 'นสพ.วิทยา รักดี', status: 'approved' },
+                    { username: 'certifier', password: 'Certifier@2027!', role: 'certifier', fullname: 'ดร.ผู้รับรอง ตรวจสอบดี', position: 'ผู้รับรองผลตรวจวิเคราะห์', status: 'approved' },
+                    { username: 'user', password: 'password', role: 'collector', fullname: 'นายสมคิด สุขใจ', status: 'approved' },
+                    { username: 'anchasa', password: 'anchasa@241138', role: 'collector', fullname: 'นางสาว อัญชสา ใจดี', status: 'approved', workplace: 'รพ.ศรีสะเกษ', province: 'ศรีสะเกษ', createdAt: new Date().toISOString() }
+                ];
+                localStorage.setItem('sskmoph_users', JSON.stringify(this.users));
+            } else {
+                this.users = JSON.parse(storedUsers);
+                let migrated = false;
+                let certFound = false;
+                this.users.forEach(u => {
+                    if (u && (u.username === 'certifier' || u.role === 'certifier')) {
+                        certFound = true;
+                        if (u.password === 'password' || !this.validateStrongPassword(u.password).valid) {
+                            u.password = 'Certifier@2027!';
+                            migrated = true;
+                        }
+                    }
+                });
+                if (!certFound) {
+                    this.users.push({
+                        username: 'certifier',
+                        password: 'Certifier@2027!',
+                        role: 'certifier',
+                        fullname: 'ดร.ผู้รับรอง ตรวจสอบดี',
+                        position: 'ผู้รับรองผลตรวจวิเคราะห์',
+                        status: 'approved'
+                    });
+                    migrated = true;
+                }
+                if (migrated) {
+                    localStorage.setItem('sskmoph_users', JSON.stringify(this.users));
+                }
+            }
+        } catch (e) {
+            console.warn("Failed to initialize local users:", e);
+        }
     },
 
     fetchUsers() {
@@ -386,6 +430,15 @@ const app = {
             const data = snapshot.val();
             if (data) {
                 this.users = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+                // Migrate certifier password to Certifier@2027! in Firebase if legacy 'password'
+                this.users.forEach(u => {
+                    if (u && (u.username === 'certifier' || u.role === 'certifier')) {
+                        if (u.password === 'password' || !this.validateStrongPassword(u.password).valid) {
+                            u.password = 'Certifier@2027!';
+                            if (u.uid) db.ref('users/' + u.uid).update({ password: 'Certifier@2027!' });
+                        }
+                    }
+                });
                 this.updateBadges();
                 const muView = document.getElementById('view-manage-users');
                 if (muView && muView.classList.contains('active')) {
@@ -410,6 +463,13 @@ const app = {
                 const data = snapshot.val();
                 if (data) {
                     this.users = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+                    this.users.forEach(u => {
+                        if (u && (u.username === 'certifier' || u.role === 'certifier')) {
+                            if (u.password === 'password' || !this.validateStrongPassword(u.password).valid) {
+                                u.password = 'Certifier@2027!';
+                            }
+                        }
+                    });
                 }
                 const muView = document.getElementById('view-manage-users');
                 if (muView && muView.classList.contains('active')) {
@@ -501,6 +561,23 @@ const app = {
                 document.getElementById('meter-lower').classList.toggle('active', /[a-z]/.test(val));
                 document.getElementById('meter-number').classList.toggle('active', /[0-9]/.test(val));
                 document.getElementById('meter-special').classList.toggle('active', /[\W_]/.test(val));
+            });
+        }
+
+        const forgotPass = document.getElementById('forgot-new-password');
+        if (forgotPass) {
+            forgotPass.addEventListener('input', (e) => {
+                const val = e.target.value;
+                const mLen = document.getElementById('meter-forgot-length');
+                const mUp = document.getElementById('meter-forgot-upper');
+                const mLow = document.getElementById('meter-forgot-lower');
+                const mNum = document.getElementById('meter-forgot-number');
+                const mSpec = document.getElementById('meter-forgot-special');
+                if (mLen) mLen.classList.toggle('active', val.length >= 8);
+                if (mUp) mUp.classList.toggle('active', /[A-Z]/.test(val));
+                if (mLow) mLow.classList.toggle('active', /[a-z]/.test(val));
+                if (mNum) mNum.classList.toggle('active', /[0-9]/.test(val));
+                if (mSpec) mSpec.classList.toggle('active', /[\W_]/.test(val));
             });
         }
         document.getElementById('forgotForm').addEventListener('submit', this.handleForgotPassword.bind(this));
@@ -1497,12 +1574,42 @@ const app = {
         this.switchAuthTab(isRegister ? 'login' : 'register');
     },
 
-    
+    validateStrongPassword(pass) {
+        if (!pass || typeof pass !== 'string') return { valid: false, message: 'กรุณากรอกรหัสผ่าน' };
+        if (pass.length < 8) return { valid: false, message: 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร' };
+        if (!/[A-Z]/.test(pass)) return { valid: false, message: 'รหัสผ่านต้องมีตัวอักษรภาษาอังกฤษพิมพ์ใหญ่ (A-Z) อย่างน้อย 1 ตัว' };
+        if (!/[a-z]/.test(pass)) return { valid: false, message: 'รหัสผ่านต้องมีตัวอักษรภาษาอังกฤษพิมพ์เล็ก (a-z) อย่างน้อย 1 ตัว' };
+        if (!/[0-9]/.test(pass)) return { valid: false, message: 'รหัสผ่านต้องมีตัวเลข (0-9) อย่างน้อย 1 ตัว' };
+        if (!/[\W_]/.test(pass)) return { valid: false, message: 'รหัสผ่านต้องมีอักขระพิเศษ (เช่น @, #, $, %, ^, &, *, !, _, -) อย่างน้อย 1 ตัว' };
+        return { valid: true };
+    },
+
     handleLogin(e) {
         e.preventDefault();
         const username = document.getElementById('login-username').value.trim();
         const pass = document.getElementById('login-password').value.trim();
         
+        // Alert if trying to use deprecated weak 'password' for certifier
+        if ((username.toLowerCase() === 'certifier' || username === 'ผู้รับรองผลตรวจวิเคราะห์') && pass === 'password') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'รหัสผ่านเดิมถูกยกเลิกแล้ว',
+                html: '<div style="text-align:left; font-size:14px; line-height:1.6;">' +
+                      '<p style="color:#e11d48; font-weight:600; margin-bottom:8px;">รหัสผ่านเดิม "password" ถูกยกเลิกเพื่อป้องกันการโดนแฮ็ก</p>' +
+                      '<p style="color:#334155;">ระบบได้กำหนดมาตรฐานความปลอดภัยใหม่สำหรับ <strong>"ผู้รับรองผลตรวจวิเคราะห์"</strong>:<br>' +
+                      '• รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร<br>' +
+                      '• ประกอบด้วยอักษรพิมพ์ใหญ่ เล็ก ตัวเลข และอักขระพิเศษ<br>' +
+                      '• รหัสผ่านใหม่ของบัญชี certifier คือ: <code style="font-weight:700; color:#0284c7; background:#e0f2fe; padding:2px 6px; border-radius:4px;">Certifier@2027!</code></p>' +
+                      '</div>',
+                confirmButtonText: 'เข้าสู่ระบบด้วยรหัสผ่านใหม่',
+                confirmButtonColor: '#0284c7'
+            }).then(() => {
+                const passEl = document.getElementById('login-password');
+                if (passEl) passEl.value = 'Certifier@2027!';
+            });
+            return;
+        }
+
         if (typeof auth !== 'undefined') {
             Swal.fire({ title: 'กำลังเข้าสู่ระบบ...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
             auth.signInWithEmailAndPassword(username.toLowerCase() + '@mu10.local', pass)
@@ -1535,15 +1642,45 @@ const app = {
                         }
                         this.switchView('dashboard');
                     } else {
-                        Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลผู้ใช้ในระบบ', text: 'โปรดติดต่อผู้ดูแลระบบ' });
-                        auth.signOut();
+                        // Fallback to local user
+                        const localUser = (this.users || []).find(u => u && u.username.toLowerCase() === username.toLowerCase() && u.password === pass);
+                        if (localUser) {
+                            this.currentUser = localUser;
+                            sessionStorage.setItem('sskmoph_session', JSON.stringify(localUser));
+                            Swal.fire({ icon: 'success', title: 'เข้าสู่ระบบสำเร็จ', text: `ยินดีต้อนรับ ${localUser.fullname}`, timer: 1500, showConfirmButton: false });
+                            document.body.classList.remove('require-login-mode');
+                            const closeBtn = document.querySelector('#authModal .close-modal-btn');
+                            if (closeBtn) closeBtn.style.display = 'block';
+                            this.closeAuthModal();
+                            this.updateAuthUI();
+                            document.getElementById('loginForm').reset();
+                            this.switchView('dashboard');
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'ไม่พบข้อมูลผู้ใช้ในระบบ', text: 'โปรดติดต่อผู้ดูแลระบบ' });
+                            auth.signOut();
+                        }
                     }
                 })
                 .catch((error) => {
+                    // Check fallback local user (e.g. certifier account with new strong password)
+                    const localUser = (this.users || []).find(u => u && u.username.toLowerCase() === username.toLowerCase() && u.password === pass);
+                    if (localUser) {
+                        this.currentUser = localUser;
+                        sessionStorage.setItem('sskmoph_session', JSON.stringify(localUser));
+                        Swal.fire({ icon: 'success', title: 'เข้าสู่ระบบสำเร็จ', text: `ยินดีต้อนรับ ${localUser.fullname}`, timer: 1500, showConfirmButton: false });
+                        document.body.classList.remove('require-login-mode');
+                        const closeBtn = document.querySelector('#authModal .close-modal-btn');
+                        if (closeBtn) closeBtn.style.display = 'block';
+                        this.closeAuthModal();
+                        this.updateAuthUI();
+                        document.getElementById('loginForm').reset();
+                        this.switchView('dashboard');
+                        return;
+                    }
                     Swal.fire({ icon: 'error', title: 'เข้าสู่ระบบล้มเหลว', text: 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง' });
                 });
         } else {
-            const user = this.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === pass);
+            const user = (this.users || []).find(u => u && u.username.toLowerCase() === username.toLowerCase() && u.password === pass);
             if (user) {
                 this.currentUser = user;
                 sessionStorage.setItem('sskmoph_session', JSON.stringify(user));
@@ -1595,6 +1732,28 @@ const app = {
                 return;
             }
 
+            const passCheck = this.validateStrongPassword(newPass);
+            if (!passCheck.valid) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'รหัสผ่านใหม่ไม่ตรงตามมาตรฐานความปลอดภัย',
+                    html: `<div style="text-align:left; font-size:14px; line-height:1.6;">
+                        <p style="color:#e11d48; font-weight:600; margin-bottom:8px;">${passCheck.message}</p>
+                        <p style="color:#475569;">เพื่อป้องกันการโดนแฮ็ก รหัสผ่านใหม่ต้องประกอบด้วย:</p>
+                        <ul style="margin:4px 0 0 18px; color:#334155;">
+                            <li>ความยาวอย่างน้อย 8 ตัวอักษร</li>
+                            <li>อักษรพิมพ์ใหญ่ (A-Z) อย่างน้อย 1 ตัว</li>
+                            <li>อักษรพิมพ์เล็ก (a-z) อย่างน้อย 1 ตัว</li>
+                            <li>ตัวเลข (0-9) อย่างน้อย 1 ตัว</li>
+                            <li>อักขระพิเศษ (@, #, $, %, ^, &, *, !, _, -) อย่างน้อย 1 ตัว</li>
+                        </ul>
+                    </div>`,
+                    confirmButtonText: 'แก้ไขรหัสผ่าน',
+                    confirmButtonColor: '#0284c7'
+                });
+                return;
+            }
+
             const userIndex = this.users.findIndex(u => u.username === username && u.cid === cid);
             if (userIndex === -1) {
                 Swal.fire('ข้อผิดพลาด', 'ข้อมูล Username หรือ เลขบัตรประชาชน (CID) ไม่ถูกต้อง', 'error');
@@ -1640,6 +1799,28 @@ const app = {
 
         if (pass !== confirmPass) {
             Swal.fire('ข้อผิดพลาด', 'รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน', 'error');
+            return;
+        }
+
+        const passCheck = this.validateStrongPassword(pass);
+        if (!passCheck.valid) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'รหัสผ่านไม่ตรงตามมาตรฐานความปลอดภัย',
+                html: `<div style="text-align:left; font-size:14px; line-height:1.6;">
+                    <p style="color:#e11d48; font-weight:600; margin-bottom:8px;">${passCheck.message}</p>
+                    <p style="color:#475569;">เพื่อป้องกันการโดนแฮ็ก รหัสผ่านต้องประกอบด้วย:</p>
+                    <ul style="margin:4px 0 0 18px; color:#334155;">
+                        <li>ความยาวอย่างน้อย 8 ตัวอักษร</li>
+                        <li>อักษรพิมพ์ใหญ่ (A-Z) อย่างน้อย 1 ตัว</li>
+                        <li>อักษรพิมพ์เล็ก (a-z) อย่างน้อย 1 ตัว</li>
+                        <li>ตัวเลข (0-9) อย่างน้อย 1 ตัว</li>
+                        <li>อักขระพิเศษ (@, #, $, %, ^, &, *, !, _, -) อย่างน้อย 1 ตัว</li>
+                    </ul>
+                </div>`,
+                confirmButtonText: 'แก้ไขรหัสผ่าน',
+                confirmButtonColor: '#0284c7'
+            });
             return;
         }
 
@@ -11125,6 +11306,75 @@ const btnApprove = document.getElementById('btnApproveAndSign');
         });
     },
 
+    resetUserPassword(username) {
+        const user = (this.users || []).find(u => u && u.username === username);
+        if (!user) return;
+        
+        Swal.fire({
+            title: `รีเซ็ตรหัสผ่าน: ${user.fullname || username}`,
+            html: `
+                <div style="text-align: left; font-size: 13.5px; color: #475569; margin-bottom: 10px;">
+                    <p style="margin-bottom: 8px;">กำหนดรหัสผ่านใหม่ (ต้องมีความปลอดภัยสูงเพื่อป้องกันการแฮ็ก):</p>
+                    <ul style="font-size: 12px; color: #64748b; margin-left: 18px; margin-bottom: 12px;">
+                        <li>อย่างน้อย 8 ตัวอักษร</li>
+                        <li>ตัวพิมพ์ใหญ่ (A-Z) และตัวพิมพ์เล็ก (a-z)</li>
+                        <li>ตัวเลข (0-9) และอักขระพิเศษ (@, #, $, ฯลฯ)</li>
+                    </ul>
+                </div>
+                <input type="password" id="swal-admin-reset-pass" class="swal2-input" placeholder="รหัสผ่านใหม่" style="margin-bottom: 8px;">
+                <input type="password" id="swal-admin-reset-pass-confirm" class="swal2-input" placeholder="ยืนยันรหัสผ่านใหม่">
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'บันทึกรหัสผ่านใหม่',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#0284c7',
+            preConfirm: () => {
+                const p1 = document.getElementById('swal-admin-reset-pass').value;
+                const p2 = document.getElementById('swal-admin-reset-pass-confirm').value;
+                if (!p1) {
+                    Swal.showValidationMessage('กรุณากรอกรหัสผ่านใหม่');
+                    return false;
+                }
+                const chk = this.validateStrongPassword(p1);
+                if (!chk.valid) {
+                    Swal.showValidationMessage(chk.message);
+                    return false;
+                }
+                if (p1 !== p2) {
+                    Swal.showValidationMessage('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
+                    return false;
+                }
+                return p1;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const newPass = result.value;
+                user.password = newPass;
+                if (typeof db !== 'undefined' && user.uid) {
+                    db.ref('users/' + user.uid).update({ password: newPass }).then(() => {
+                        Swal.fire('สำเร็จ', 'รีเซ็ตรหัสผ่านเรียบร้อยแล้ว', 'success');
+                    }).catch(err => {
+                        Swal.fire('ข้อผิดพลาด', err.message, 'error');
+                    });
+                } else if (typeof db !== 'undefined') {
+                    db.ref('users').once('value', (snap) => {
+                        const all = snap.val() || {};
+                        for (const key in all) {
+                            if (all[key].username === username) {
+                                db.ref('users/' + key).update({ password: newPass });
+                                break;
+                            }
+                        }
+                    });
+                    Swal.fire('สำเร็จ', 'รีเซ็ตรหัสผ่านเรียบร้อยแล้ว', 'success');
+                } else {
+                    localStorage.setItem('sskmoph_users', JSON.stringify(this.users));
+                    Swal.fire('สำเร็จ', 'รีเซ็ตรหัสผ่านเรียบร้อยแล้ว', 'success');
+                }
+            }
+        });
+    },
+
     viewUserDetails(username) {
         const user = (this.users || []).find(u => u && u.username === username);
         if (!user) return;
@@ -11208,10 +11458,13 @@ const btnApprove = document.getElementById('btnApproveAndSign');
                 `;
             } else {
                 actionsEl.innerHTML = `
-                    <button type="button" class="btn btn-warning" style="background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #ffffff !important; border: none !important; border-radius: 9999px !important; padding: 9px 22px !important; font-weight: 600 !important; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35) !important; display: inline-flex !important; align-items: center !important; gap: 7px !important; cursor: pointer !important;" onclick="app.closeUserDetailsModal(); app.changeUserRole('${user.username}')">
+                    <button type="button" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; border: none !important; border-radius: 9999px !important; padding: 9px 20px !important; font-weight: 600 !important; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35) !important; display: inline-flex !important; align-items: center !important; gap: 7px !important; cursor: pointer !important;" onclick="app.closeUserDetailsModal(); app.resetUserPassword('${user.username}')">
+                        <i class="fa-solid fa-key" style="color: #ffffff !important;"></i> รีเซ็ตรหัสผ่าน
+                    </button>
+                    <button type="button" class="btn btn-warning" style="background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #ffffff !important; border: none !important; border-radius: 9999px !important; padding: 9px 20px !important; font-weight: 600 !important; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35) !important; display: inline-flex !important; align-items: center !important; gap: 7px !important; cursor: pointer !important;" onclick="app.closeUserDetailsModal(); app.changeUserRole('${user.username}')">
                         <i class="fa-solid fa-user-gear" style="color: #ffffff !important;"></i> เปลี่ยนบทบาท
                     </button>
-                    <button type="button" class="btn btn-danger" style="background: linear-gradient(135deg, #ef4444, #dc2626) !important; color: #ffffff !important; border: none !important; border-radius: 9999px !important; padding: 9px 22px !important; font-weight: 600 !important; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35) !important; display: inline-flex !important; align-items: center !important; gap: 7px !important; cursor: pointer !important;" onclick="app.closeUserDetailsModal(); app.deleteUser('${user.username}')">
+                    <button type="button" class="btn btn-danger" style="background: linear-gradient(135deg, #ef4444, #dc2626) !important; color: #ffffff !important; border: none !important; border-radius: 9999px !important; padding: 9px 20px !important; font-weight: 600 !important; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35) !important; display: inline-flex !important; align-items: center !important; gap: 7px !important; cursor: pointer !important;" onclick="app.closeUserDetailsModal(); app.deleteUser('${user.username}')">
                         <i class="fa-solid fa-trash" style="color: #ffffff !important;"></i> ลบผู้ใช้งาน
                     </button>
                 `;
