@@ -9409,3 +9409,263 @@ body.presentation-mode .app-navbar {
     background-position: top center !important;
     image-rendering: -webkit-optimize-contrast;
 }
+
+/* ========================================================
+   MOBILE PHONE HORIZONTAL SCROLL TABLE VIEW (<= 768px)
+   Smooth horizontal swipe to view columns cleanly and orderly
+   ======================================================== */
+@media (max-width: 768px) {
+  /* 1. Global Viewport & Container Reset (Prevents whole page from shifting) */
+  html, body, .app-container, .main-content {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  .content-body {
+    padding: 10px 8px !important;
+  }
+
+  /* 2. Top Navbar Compact Mode on Mobile */
+  .top-navbar {
+    padding: 6px 10px !important;
+    min-height: 48px !important;
+    height: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .top-navbar .navbar-left {
+    gap: 6px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  .top-navbar .view-title {
+    font-size: 13.5px !important;
+    max-width: 160px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .top-navbar .system-time {
+    display: none !important; /* Phone OS status bar already displays time */
+  }
+
+  .top-navbar .navbar-right {
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .top-navbar .btn-logout,
+  .top-navbar .btn {
+    padding: 5px 9px !important;
+    font-size: 11.5px !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  /* 3. Card Container Spacing */
+  #view-lab-verify .table-container,
+  #view-lab-analysis .table-container,
+  #view-lab-certify .table-container,
+  #view-download-results .table-container,
+  #view-followup .table-container,
+  #view-data-download .table-container,
+  #view-manage-users .table-container,
+  #view-sample-record .saved-records-container,
+  .table-container {
+    padding: 14px 12px !important;
+    border-radius: 16px !important;
+    margin-bottom: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .table-header-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .table-header-bar h3 {
+    font-size: 15.5px !important;
+    line-height: 1.3 !important;
+  }
+
+  .table-header-bar p {
+    font-size: 11.5px !important;
+  }
+
+  .table-actions,
+  .search-box-wrapper,
+  .search-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 4. Elegant Horizontal Scroll Table for Mobile (เลื่อนดูทางขวา เรียบร้อย คมชัด) */
+  .responsive-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    position: relative !important;
+    margin-bottom: 14px !important;
+  }
+
+  /* Swipe hint footer */
+  .responsive-table::after {
+    content: "👉 เลื่อนตารางไปทางขวาเพื่อดูข้อมูลและการจัดการเพิ่มเติม →";
+    display: block;
+    text-align: right;
+    font-size: 11px;
+    color: #0284c7;
+    background: #f0f9ff;
+    padding: 5px 12px;
+    border-top: 1px solid #e0f2fe;
+    font-weight: 500;
+  }
+
+  .responsive-table table,
+  #view-lab-verify #verifyTable,
+  #view-lab-analysis #analysisTable,
+  #view-lab-certify #certifyTable,
+  #view-download-results #downloadTable,
+  #view-data-download #exportTable,
+  #view-followup #followupTable,
+  #view-sample-record .responsive-table table,
+  .modern-table {
+    display: table !important;
+    width: max-content !important;
+    min-width: 780px !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+  }
+
+  .responsive-table thead,
+  #view-lab-verify #verifyTable thead,
+  #view-lab-analysis #analysisTable thead,
+  #view-lab-certify #certifyTable thead,
+  #view-download-results #downloadTable thead,
+  #view-data-download #exportTable thead,
+  #view-followup #followupTable thead,
+  #view-sample-record .responsive-table table thead {
+    display: table-header-group !important;
+  }
+
+  .responsive-table thead tr,
+  #view-lab-verify #verifyTable thead tr,
+  #view-lab-analysis #analysisTable thead tr,
+  #view-lab-certify #certifyTable thead tr,
+  #view-download-results #downloadTable thead tr,
+  #view-data-download #exportTable thead tr,
+  #view-followup #followupTable thead tr,
+  #view-sample-record .responsive-table table thead tr {
+    display: table-row !important;
+    background: #0f274e !important;
+    color: #ffffff !important;
+    height: 42px !important;
+  }
+
+  .responsive-table thead th,
+  #view-lab-verify #verifyTable thead th,
+  #view-lab-analysis #analysisTable thead th,
+  #view-lab-certify #certifyTable thead th,
+  #view-download-results #downloadTable thead th,
+  #view-data-download #exportTable thead th,
+  #view-followup #followupTable thead th,
+  #view-sample-record .responsive-table table thead th {
+    display: table-cell !important;
+    background: #0f274e !important;
+    color: #ffffff !important;
+    padding: 10px 14px !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    border: none !important;
+    border-bottom: 2px solid rgba(56, 189, 248, 0.35) !important;
+  }
+
+  .responsive-table tbody,
+  #verifyTableBody,
+  #analysisTableBody,
+  #certifyTableBody,
+  #downloadTableBody,
+  #savedRecordsTableBody,
+  #followupTableBody {
+    display: table-row-group !important;
+  }
+
+  .responsive-table tbody tr,
+  #verifyTableBody tr,
+  #analysisTableBody tr,
+  #certifyTableBody tr,
+  #downloadTableBody tr,
+  #savedRecordsTableBody tr,
+  #followupTableBody tr {
+    display: table-row !important;
+    background: #ffffff !important;
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+  }
+
+  .responsive-table tbody tr:nth-child(even) {
+    background: #f8fafc !important;
+  }
+
+  .responsive-table tbody td,
+  #verifyTableBody td,
+  #analysisTableBody td,
+  #certifyTableBody td,
+  #downloadTableBody td,
+  #savedRecordsTableBody td,
+  #followupTableBody td {
+    display: table-cell !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    text-align: left !important;
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+  }
+
+  /* Override any word-break or narrow width rules on sample records */
+  #view-sample-record .responsive-table table th,
+  #view-sample-record .responsive-table table td,
+  #view-sample-record .responsive-table table th:nth-child(n),
+  #view-sample-record .responsive-table table td:nth-child(n) {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    width: auto !important;
+    min-width: unset !important;
+    padding: 10px 14px !important;
+  }
+
+  /* Compact Action Buttons in Table Cells */
+  .responsive-table tbody td:last-child {
+    white-space: nowrap !important;
+    text-align: center !important;
+  }
+
+  .responsive-table tbody td .btn {
+    white-space: nowrap !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+  }
+}
