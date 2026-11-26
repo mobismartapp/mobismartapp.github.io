@@ -4702,6 +4702,18 @@ document.getElementById('formNameTitle').innerText = title;
             });
         });
         
+        // จัดเรียงรายการตัวอย่างตามรหัสตัวอย่างหน้าแลป (Lab No.) จากน้อยไปมากอัตโนมัติ (เช่น 0001, 0002, ... 0100)
+        allItems.sort((a, b) => {
+            const numA = parseInt(a.lab_no, 10);
+            const numB = parseInt(b.lab_no, 10);
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return numA - numB;
+            }
+            if (!isNaN(numA)) return -1;
+            if (!isNaN(numB)) return 1;
+            return String(a.lab_no).localeCompare(String(b.lab_no));
+        });
+
         return allItems;
     },
 
