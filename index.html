@@ -4190,9 +4190,18 @@
                             <i class="fa-solid fa-id-card-clip"></i>
                         </div>
                         <div class="input-icon-wrapper">
-                            <label for="forgot-new-password" style="color: #ffffff !important; font-weight: 600; font-size: 13px; margin-bottom: 5px; display: block;">รหัสผ่านใหม่</label>
-                            <input type="password" id="forgot-new-password" required placeholder="รหัสผ่านใหม่อย่างน้อย 6 หลัก" minlength="6" style="padding-right: 40px;">
+                            <label for="forgot-new-password" style="color: #ffffff !important; font-weight: 600; font-size: 13px; margin-bottom: 5px; display: block;">รหัสผ่านใหม่ <span style="font-size: 11px; font-weight: 400; color: #94a3b8;">(อย่างน้อย 8 ตัว, พิมพ์ใหญ่ เล็ก ตัวเลข พิเศษ)</span></label>
+                            <input type="password" id="forgot-new-password" required placeholder="รหัสผ่านใหม่อย่างน้อย 8 ตัว" minlength="8" style="padding-right: 40px;">
                             <i class="fa-solid fa-key"></i>
+                        </div>
+                        <div class="password-meter" style="margin-top: -6px; margin-bottom: 12px;">
+                            <div class="meter-steps">
+                                <div class="meter-step" id="meter-forgot-length"><div class="dot"></div><span>8 ตัว</span></div>
+                                <div class="meter-step" id="meter-forgot-upper"><div class="dot"></div><span>A-Z</span></div>
+                                <div class="meter-step" id="meter-forgot-lower"><div class="dot"></div><span>a-z</span></div>
+                                <div class="meter-step" id="meter-forgot-number"><div class="dot"></div><span>0-9</span></div>
+                                <div class="meter-step" id="meter-forgot-special"><div class="dot"></div><span>พิเศษ</span></div>
+                            </div>
                         </div>
                         <div class="input-icon-wrapper">
                             <label for="forgot-confirm-password" style="color: #ffffff !important; font-weight: 600; font-size: 13px; margin-bottom: 5px; display: block;">ยืนยันรหัสผ่านใหม่</label>
@@ -5053,6 +5062,6 @@
         </div>
     </div>
 
-    <script src="app_v85.js?v=1795678300000"></script>
+    <script src="app_v85.js?v=1795680500000"></script>
 </body>
 </html>
