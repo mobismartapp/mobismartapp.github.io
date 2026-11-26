@@ -4681,45 +4681,25 @@ document.getElementById('formNameTitle').innerText = title;
         const provVal = document.getElementById('runSheetFilterProvince') ? document.getElementById('runSheetFilterProvince').value : 'ALL';
         const searchVal = document.getElementById('runSheetSearch') ? document.getElementById('runSheetSearch').value.toLowerCase().trim() : '';
 
-        // Dynamically update thead if MU.10-001 is selected (เพิ่มช่องการแปลผล, ผลตรวจ ตามแบบบันทึกตัวอย่าง)
+        // Thead header with 9 standard columns
         const thead = document.getElementById('runSheetThead');
         if (thead) {
-            if (formVal === 'MU.10-001') {
-                thead.innerHTML = `
-                    <tr>
-                        <th style="width: 45px; text-align: center; padding: 10px 8px; white-space: nowrap;">
-                            <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
-                        </th>
-                        <th style="width: 50px; text-align: center; padding: 10px 6px; white-space: nowrap;">1. ลำดับ</th>
-                        <th style="width: 90px; text-align: center; padding: 10px 6px; white-space: nowrap;">2. รหัสเอกสาร</th>
-                        <th style="padding: 10px 10px; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 100px; padding: 10px 8px; white-space: nowrap;">4. อำเภอ</th>
-                        <th style="width: 90px; padding: 10px 8px; white-space: nowrap;">5. จังหวัด</th>
-                        <th style="padding: 10px 10px; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
-                        <th style="width: 80px; text-align: center; padding: 10px 6px; white-space: nowrap;">7. รหัสตัวอย่าง</th>
-                        <th style="width: 130px; padding: 10px 8px; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="min-width: 230px; padding: 10px 8px; white-space: nowrap;">9. การแปลผล</th>
-                        <th style="min-width: 120px; padding: 10px 8px; white-space: nowrap;">10. ผลตรวจ</th>
-                    </tr>
-                `;
-            } else {
-                thead.innerHTML = `
-                    <tr>
-                        <th style="width: 45px; text-align: center; padding: 10px 8px;">
-                            <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
-                        </th>
-                        <th style="width: 50px; text-align: center; padding: 10px 8px;">1. ลำดับ</th>
-                        <th style="width: 95px; text-align: center; padding: 10px 8px;">2. รหัสเอกสาร</th>
-                        <th style="padding: 10px 12px;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 110px; padding: 10px 10px;">4. อำเภอ</th>
-                        <th style="width: 100px; padding: 10px 10px;">5. จังหวัด</th>
-                        <th style="padding: 10px 12px;">6. ชื่อตัวอย่าง</th>
-                        <th style="width: 85px; text-align: center; padding: 10px 8px;">7. รหัสตัวอย่าง</th>
-                        <th style="width: 140px; padding: 10px 10px;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="width: 120px; text-align: center; padding: 10px 8px;">9. ผลตรวจ</th>
-                    </tr>
-                `;
-            }
+            thead.innerHTML = `
+                <tr>
+                    <th style="width: 45px; text-align: center; padding: 10px 8px; white-space: nowrap;">
+                        <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
+                    </th>
+                    <th style="width: 50px; text-align: center; padding: 10px 8px; white-space: nowrap;">1. ลำดับ</th>
+                    <th style="width: 95px; text-align: center; padding: 10px 8px; white-space: nowrap;">2. รหัสเอกสาร</th>
+                    <th style="padding: 10px 12px; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
+                    <th style="width: 110px; padding: 10px 10px; white-space: nowrap;">4. อำเภอ</th>
+                    <th style="width: 100px; padding: 10px 10px; white-space: nowrap;">5. จังหวัด</th>
+                    <th style="padding: 10px 12px; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
+                    <th style="width: 85px; text-align: center; padding: 10px 8px; white-space: nowrap;">7. รหัสตัวอย่าง</th>
+                    <th style="width: 140px; padding: 10px 10px; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
+                    <th style="width: 170px; text-align: center; padding: 10px 8px; white-space: nowrap;">9. ผลตรวจ</th>
+                </tr>
+            `;
         }
 
         const allItems = this.getRunSheetAllItems();
@@ -4744,7 +4724,7 @@ document.getElementById('formNameTitle').innerText = title;
 
         tbody.innerHTML = '';
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="${formVal === 'MU.10-001' ? '12' : '10'}" style="text-align: center; padding: 32px; color: #64748b; font-weight: 600;">ไม่พบรายการตัวอย่างตามเงื่อนไขที่เลือก</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 32px; color: #64748b; font-weight: 600;">ไม่พบรายการตัวอย่างตามเงื่อนไขที่เลือก</td></tr>`;
             this.updateRunSheetSelectionCount();
             return;
         }
@@ -4779,16 +4759,12 @@ document.getElementById('formNameTitle').innerText = title;
                         <div><strong style="color:#0284c7;">[ ]</strong> GT Kit</div>
                         <div style="margin-top:2px;"><strong style="color:#0284c7;">[ ]</strong> TM/2 Kit</div>
                     </td>
-                    <td style="padding: 8px 8px; font-size: 11px; color: #334155; line-height: 1.35; white-space: nowrap;">
-                        <div><strong style="color:#0284c7;">[ ]</strong> สีตัวอย่าง = สีควบคุม</div>
-                        <div style="margin-top:1px;"><strong style="color:#0284c7;">[ ]</strong> สีควบคุม > สีตัวอย่าง < สีตัดสิน</div>
-                        <div style="margin-top:1px;"><strong style="color:#0284c7;">[ ]</strong> สีตัวอย่าง ≥ สีตัดสิน</div>
-                        <div style="margin-top:1px;"><strong style="color:#0284c7;">[ ]</strong> พบ Spot &nbsp;&nbsp; <strong style="color:#0284c7;">[ ]</strong> ไม่พบ Spot</div>
-                    </td>
-                    <td style="padding: 8px 8px; font-size: 11.5px; color: #334155; line-height: 1.4; white-space: nowrap;">
-                        <div><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</div>
-                        <div style="margin-top:1px;"><strong style="color:#0284c7;">[ ]</strong> พบปลอดภัย</div>
-                        <div style="margin-top:1px;"><strong style="color:#dc2626;">[ ]</strong> พบอันตราย</div>
+                    <td style="padding: 8px 10px; font-size: 11.5px; color: #334155; line-height: 1.4; white-space: nowrap; text-align: center; background: #fafafa;">
+                        <div style="display: inline-flex; align-items: center; gap: 8px;">
+                            <span><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</span>
+                            <span><strong style="color:#0284c7;">[ ]</strong> พบปลอดภัย</span>
+                            <span><strong style="color:#dc2626;">[ ]</strong> พบอันตราย</span>
+                        </div>
                     </td>
                 `;
             } else {
@@ -4903,27 +4879,23 @@ document.getElementById('formNameTitle').innerText = title;
             if (isMu001) {
                 return `
                     <tr style="page-break-inside: avoid; border-bottom: 1px solid #333;">
-                        <td style="border: 1px solid #333; padding: 5px 2px; text-align: center; font-weight: bold; font-size: 10.5pt; white-space: nowrap;">${idx + 1}</td>
-                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10pt; white-space: nowrap;">${item.form_type}</td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; font-size: 10.5pt; line-height: 1.2; white-space: nowrap;">${item.location_name}</td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; font-size: 10.5pt; white-space: nowrap;">${item.district}</td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; font-size: 10.5pt; white-space: nowrap;">${item.province}</td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; font-weight: 600; font-size: 10.5pt; line-height: 1.2; white-space: nowrap;">${item.sample_name}</td>
-                        <td style="border: 1px solid #333; padding: 5px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 11.5pt; white-space: nowrap;">${item.lab_no}</td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; font-size: 9.5pt; line-height: 1.25; white-space: nowrap;">
+                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-weight: bold; font-size: 11pt; white-space: nowrap;">${idx + 1}</td>
+                        <td style="border: 1px solid #333; padding: 5px 4px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt; white-space: nowrap;">${item.form_type}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; line-height: 1.2; white-space: nowrap;">${item.location_name}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; white-space: nowrap;">${item.district}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; white-space: nowrap;">${item.province}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-weight: 600; font-size: 11pt; line-height: 1.2; white-space: nowrap;">${item.sample_name}</td>
+                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-family: monospace; font-weight: bold; font-size: 12pt; white-space: nowrap;">${item.lab_no}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10pt; line-height: 1.3; white-space: nowrap;">
                             <div>[ &nbsp; ] ยาฆ่าแมลง (GT Kit)</div>
                             <div style="margin-top: 2px;">[ &nbsp; ] ยาฆ่าแมลง (TM/2 Kit)</div>
                         </td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; font-size: 9pt; line-height: 1.2; white-space: nowrap;">
-                            <div>[ &nbsp; ] สีตัวอย่าง = สีควบคุม</div>
-                            <div style="margin-top: 1px;">[ &nbsp; ] สีควบคุม > สีตัวอย่าง < สีตัดสิน</div>
-                            <div style="margin-top: 1px;">[ &nbsp; ] สีตัวอย่าง ≥ สีตัดสิน</div>
-                            <div style="margin-top: 1px;">[ &nbsp; ] พบ Spot &nbsp;&nbsp; [ &nbsp; ] ไม่พบ Spot</div>
-                        </td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; font-size: 9.5pt; line-height: 1.25; white-space: nowrap;">
-                            <div>[ &nbsp; ] ไม่พบ</div>
-                            <div style="margin-top: 1px;">[ &nbsp; ] พบปลอดภัย</div>
-                            <div style="margin-top: 1px;">[ &nbsp; ] พบอันตราย</div>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10pt; line-height: 1.3; white-space: nowrap; text-align: center;">
+                            <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                                <span>[ &nbsp; ] ไม่พบ</span>
+                                <span>[ &nbsp; ] พบปลอดภัย</span>
+                                <span>[ &nbsp; ] พบอันตราย</span>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -4996,33 +4968,18 @@ document.getElementById('formNameTitle').innerText = title;
             `;
         }).join('');
 
-        const tableHeadHtml = isMu001 ? `
-            <thead>
-                <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 10.5pt;">
-                    <th style="border: 1px solid #000; padding: 5px 2px; width: 30px; text-align: center;">ลำดับ</th>
-                    <th style="border: 1px solid #000; padding: 5px 3px; width: 65px; text-align: center;">รหัสเอกสาร</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; text-align: left;">สถานที่เก็บตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 80px; text-align: left;">อำเภอ</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 75px; text-align: left;">จังหวัด</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; text-align: left;">ชื่อตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 5px 2px; width: 55px; text-align: center;">รหัสตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 105px; text-align: left;">ชุดทดสอบที่ตรวจ</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 185px; text-align: left;">การแปลผล</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 95px; text-align: left;">ผลตรวจ</th>
-                </tr>
-            </thead>
-        ` : `
+        const tableHeadHtml = `
             <thead>
                 <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 11.5pt;">
-                    <th style="border: 1px solid #000; padding: 6px 3px; width: 35px; text-align: center;">1. ลำดับ</th>
-                    <th style="border: 1px solid #000; padding: 6px 4px; width: 75px; text-align: center;">2. รหัสเอกสาร</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; text-align: left;">3. สถานที่เก็บตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; width: 90px; text-align: left;">4. อำเภอ</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; width: 85px; text-align: left;">5. จังหวัด</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; text-align: left;">6. ชื่อตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 6px 4px; width: 70px; text-align: center;">7. รหัสตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; width: 130px; text-align: left;">8. ชุดทดสอบที่ตรวจ</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; width: 140px; text-align: center;">9. ผลตรวจ</th>
+                    <th style="border: 1px solid #000; padding: 6px 3px; width: 35px; text-align: center; white-space: nowrap;">1. ลำดับ</th>
+                    <th style="border: 1px solid #000; padding: 6px 4px; width: 75px; text-align: center; white-space: nowrap;">2. รหัสเอกสาร</th>
+                    <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
+                    <th style="border: 1px solid #000; padding: 6px 6px; width: 90px; text-align: left; white-space: nowrap;">4. อำเภอ</th>
+                    <th style="border: 1px solid #000; padding: 6px 6px; width: 85px; text-align: left; white-space: nowrap;">5. จังหวัด</th>
+                    <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
+                    <th style="border: 1px solid #000; padding: 6px 4px; width: 70px; text-align: center; white-space: nowrap;">7. รหัสตัวอย่าง</th>
+                    <th style="border: 1px solid #000; padding: 6px 6px; width: 140px; text-align: left; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
+                    <th style="border: 1px solid #000; padding: 6px 6px; width: 175px; text-align: center; white-space: nowrap;">9. ผลตรวจ</th>
                 </tr>
             </thead>
         `;
