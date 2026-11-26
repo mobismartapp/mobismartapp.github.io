@@ -1524,18 +1524,23 @@ body {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .app-sidebar {
         transform: translateX(-100%);
+        z-index: 9999;
     }
     .app-sidebar.active {
         transform: translateX(0);
+        box-shadow: 12px 0 35px rgba(0, 0, 0, 0.6);
     }
     .toggle-sidebar-btn {
-        display: block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .main-content {
         margin-left: 0;
+        width: 100%;
     }
     .top-navbar {
         padding: 0 16px;
