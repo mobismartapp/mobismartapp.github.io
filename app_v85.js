@@ -4979,7 +4979,7 @@ document.getElementById('formNameTitle').innerText = title;
         }
     },
 
-    printLabRunSheet() {
+    async printLabRunSheet() {
         const filtered = this.currentRunSheetFilteredItems || [];
         const selectedItems = filtered.filter(it => this.runSheetCheckedMap && this.runSheetCheckedMap[it.uniqueId] !== false);
         
@@ -5030,7 +5030,7 @@ document.getElementById('formNameTitle').innerText = title;
 
                 const interpCellHtml = mu2List.map(k => {
                     const cfg = mu2ChemicalConfig[k] || mu2ChemicalConfig.borax;
-                    const opts = cfg.interp.map(opt => `<span>[ &nbsp; ] ${opt}</span>`).join('&nbsp;&nbsp;');
+                    const opts = cfg.interp.map(opt => `<span style="display:inline-block; margin-right:4px; white-space:nowrap;">[ &nbsp; ] ${opt}</span>`).join('');
                     return mu2List.length > 1 ? `<div><span style="font-weight:bold;">${cfg.shortName}:</span> ${opts}</div>` : `<div>${opts}</div>`;
                 }).join('<div style="height:2px;"></div>');
 
@@ -5044,21 +5044,21 @@ document.getElementById('formNameTitle').innerText = title;
                 }).join('<div style="height:2px;"></div>');
 
                 return `
-                    <tr style="page-break-inside: avoid; border-bottom: 1px solid #333;">
-                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-weight: bold; font-size: 11pt; white-space: nowrap;">${idx + 1}</td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt; white-space: nowrap;">${item.form_type}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; line-height: 1.2; white-space: nowrap;">${item.location_name}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; white-space: nowrap;">${item.district}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; white-space: nowrap;">${item.province}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-weight: 600; font-size: 11pt; line-height: 1.2; white-space: nowrap;">${item.sample_name}</td>
-                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-family: monospace; font-weight: bold; font-size: 12pt; white-space: nowrap;">${item.lab_no}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10pt; line-height: 1.3; white-space: nowrap;">
+                    <tr style="page-break-inside: avoid; break-inside: avoid; border-bottom: 1px solid #000;">
+                        <td style="padding: 4px 2px; text-align: center; font-weight: bold; font-size: 11pt;">${idx + 1}</td>
+                        <td style="padding: 4px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10pt;">${item.form_type}</td>
+                        <td style="padding: 4px 5px; font-size: 10pt; line-height: 1.15;">${item.location_name}</td>
+                        <td style="padding: 4px 4px; font-size: 10pt; line-height: 1.15;">${item.district}</td>
+                        <td style="padding: 4px 4px; font-size: 10pt; line-height: 1.15;">${item.province}</td>
+                        <td style="padding: 4px 5px; font-weight: 600; font-size: 10.5pt; line-height: 1.15;">${item.sample_name}</td>
+                        <td style="padding: 4px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 11pt;">${item.lab_no}</td>
+                        <td style="padding: 4px 4px; font-size: 9.5pt; line-height: 1.25;">
                             ${testCellHtml}
                         </td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 9.5pt; line-height: 1.3; white-space: nowrap;">
+                        <td style="padding: 4px 4px; font-size: 9pt; line-height: 1.25;">
                             ${interpCellHtml}
                         </td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10pt; line-height: 1.3; white-space: nowrap; text-align: center;">
+                        <td style="padding: 4px 4px; font-size: 9.5pt; line-height: 1.25; text-align: center;">
                             ${resultCellHtml}
                         </td>
                     </tr>
@@ -5067,20 +5067,20 @@ document.getElementById('formNameTitle').innerText = title;
 
             if (isMu001) {
                 return `
-                    <tr style="page-break-inside: avoid; border-bottom: 1px solid #333;">
-                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-weight: bold; font-size: 11pt; white-space: nowrap;">${idx + 1}</td>
-                        <td style="border: 1px solid #333; padding: 5px 4px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt; white-space: nowrap;">${item.form_type}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; line-height: 1.2; white-space: nowrap;">${item.location_name}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; white-space: nowrap;">${item.district}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; white-space: nowrap;">${item.province}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-weight: 600; font-size: 11pt; line-height: 1.2; white-space: nowrap;">${item.sample_name}</td>
-                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-family: monospace; font-weight: bold; font-size: 12pt; white-space: nowrap;">${item.lab_no}</td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10pt; line-height: 1.3; white-space: nowrap;">
+                    <tr style="page-break-inside: avoid; break-inside: avoid; border-bottom: 1px solid #000;">
+                        <td style="padding: 4px 2px; text-align: center; font-weight: bold; font-size: 11pt;">${idx + 1}</td>
+                        <td style="padding: 4px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10pt;">${item.form_type}</td>
+                        <td style="padding: 4px 5px; font-size: 10pt; line-height: 1.15;">${item.location_name}</td>
+                        <td style="padding: 4px 4px; font-size: 10pt; line-height: 1.15;">${item.district}</td>
+                        <td style="padding: 4px 4px; font-size: 10pt; line-height: 1.15;">${item.province}</td>
+                        <td style="padding: 4px 5px; font-weight: 600; font-size: 10.5pt; line-height: 1.15;">${item.sample_name}</td>
+                        <td style="padding: 4px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 11pt;">${item.lab_no}</td>
+                        <td style="padding: 4px 4px; font-size: 9.5pt; line-height: 1.25;">
                             <div>[ &nbsp; ] ยาฆ่าแมลง (GT Kit)</div>
                             <div style="margin-top: 2px;">[ &nbsp; ] ยาฆ่าแมลง (TM/2 Kit)</div>
                         </td>
-                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10pt; line-height: 1.3; white-space: nowrap; text-align: center;">
-                            <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                        <td style="padding: 4px 4px; font-size: 9.5pt; line-height: 1.2; text-align: center;">
+                            <div style="display: flex; justify-content: space-around; align-items: center; white-space: nowrap;">
                                 <span>[ &nbsp; ] ไม่พบ</span>
                                 <span>[ &nbsp; ] พบปลอดภัย</span>
                                 <span>[ &nbsp; ] พบอันตราย</span>
@@ -5091,7 +5091,7 @@ document.getElementById('formNameTitle').innerText = title;
             }
 
             let resultCell = `
-                <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 11pt;">
+                <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10.5pt;">
                     <span>[ &nbsp; ] ผ่าน</span>
                     <span>[ &nbsp; ] ตก</span>
                 </div>
@@ -5105,7 +5105,7 @@ document.getElementById('formNameTitle').innerText = title;
                 `;
             } else if (item.form_type === 'MU.10-003') {
                 resultCell = `
-                    <div style="font-size: 10pt; text-align: left; padding-left: 2px;">
+                    <div style="font-size: 9.5pt; text-align: left; padding-left: 2px;">
                         <span>ค่าโพลาร์: .......... %</span><br>
                         <span>[ &nbsp; ] ≤25% (ผ่าน) &nbsp; [ &nbsp; ] >25% (ตก)</span>
                     </div>
@@ -5119,7 +5119,7 @@ document.getElementById('formNameTitle').innerText = title;
                 `;
             } else if (item.form_type === 'MU.10-005') {
                 resultCell = `
-                    <div style="font-size: 10pt; text-align: left; padding-left: 2px;">
+                    <div style="font-size: 9.5pt; text-align: left; padding-left: 2px;">
                         <span>ไอโอดีน: .......... ppm</span><br>
                         <span>[ &nbsp; ] 20-40 (ผ่าน) &nbsp; [ &nbsp; ] ตกเกณฑ์</span>
                     </div>
@@ -5141,16 +5141,16 @@ document.getElementById('formNameTitle').innerText = title;
             }
 
             return `
-                <tr style="page-break-inside: avoid; border-bottom: 1px solid #333;">
-                    <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-weight: bold; font-size: 11pt;">${idx + 1}</td>
-                    <td style="border: 1px solid #333; padding: 5px 4px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt;">${item.form_type}</td>
-                    <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; line-height: 1.2;">${item.location_name}</td>
-                    <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt;">${item.district}</td>
-                    <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt;">${item.province}</td>
-                    <td style="border: 1px solid #333; padding: 5px 6px; font-weight: 600; font-size: 11pt; line-height: 1.2;">${item.sample_name}</td>
-                    <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-family: monospace; font-weight: bold; font-size: 12pt;">${item.lab_no}</td>
-                    <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10.5pt; line-height: 1.2;">${item.test_name}</td>
-                    <td style="border: 1px solid #333; padding: 5px 4px; text-align: center; background: #fff;">
+                <tr style="page-break-inside: avoid; break-inside: avoid; border-bottom: 1px solid #000;">
+                    <td style="padding: 4px 2px; text-align: center; font-weight: bold; font-size: 11pt;">${idx + 1}</td>
+                    <td style="padding: 4px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10pt;">${item.form_type}</td>
+                    <td style="padding: 4px 5px; font-size: 10pt; line-height: 1.15;">${item.location_name}</td>
+                    <td style="padding: 4px 4px; font-size: 10pt; line-height: 1.15;">${item.district}</td>
+                    <td style="padding: 4px 4px; font-size: 10pt; line-height: 1.15;">${item.province}</td>
+                    <td style="padding: 4px 5px; font-weight: 600; font-size: 10.5pt; line-height: 1.15;">${item.sample_name}</td>
+                    <td style="padding: 4px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 11pt;">${item.lab_no}</td>
+                    <td style="padding: 4px 4px; font-size: 9.5pt; line-height: 1.25;">${item.test_name}</td>
+                    <td style="padding: 4px 4px; text-align: center; background: #fff;">
                         ${resultCell}
                     </td>
                 </tr>
@@ -5161,49 +5161,101 @@ document.getElementById('formNameTitle').innerText = title;
         if (isMu002) {
             tableHeadHtml = `
                 <thead>
-                    <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 11pt;">
-                        <th style="border: 1px solid #000; padding: 6px 3px; width: 32px; text-align: center; white-space: nowrap;">1. ลำดับ</th>
-                        <th style="border: 1px solid #000; padding: 6px 4px; width: 68px; text-align: center; white-space: nowrap;">2. รหัสเอกสาร</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 85px; text-align: left; white-space: nowrap;">4. อำเภอ</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 80px; text-align: left; white-space: nowrap;">5. จังหวัด</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
-                        <th style="border: 1px solid #000; padding: 6px 4px; width: 65px; text-align: center; white-space: nowrap;">7. รหัสตัวอย่าง</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 120px; text-align: left; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 185px; text-align: left; white-space: nowrap;">9. การแปลผล</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 105px; text-align: center; white-space: nowrap;">10. ผลตรวจ</th>
+                    <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 10.5pt;">
+                        <th style="width: 3.5%; text-align: center; padding: 5px 2px;">1. ลำดับ</th>
+                        <th style="width: 7%; text-align: center; padding: 5px 2px;">2. รหัสเอกสาร</th>
+                        <th style="width: 16%; text-align: left; padding: 5px 4px;">3. สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 7.5%; text-align: left; padding: 5px 4px;">4. อำเภอ</th>
+                        <th style="width: 6.5%; text-align: left; padding: 5px 4px;">5. จังหวัด</th>
+                        <th style="width: 14.5%; text-align: left; padding: 5px 4px;">6. ชื่อตัวอย่าง</th>
+                        <th style="width: 6.5%; text-align: center; padding: 5px 2px;">7. รหัสตัวอย่าง</th>
+                        <th style="width: 13%; text-align: left; padding: 5px 4px;">8. ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 14.5%; text-align: left; padding: 5px 4px;">9. การแปลผล</th>
+                        <th style="width: 11%; text-align: center; padding: 5px 4px;">10. ผลตรวจ</th>
                     </tr>
                 </thead>
             `;
         } else {
             tableHeadHtml = `
                 <thead>
-                    <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 11.5pt;">
-                        <th style="border: 1px solid #000; padding: 6px 3px; width: 35px; text-align: center; white-space: nowrap;">1. ลำดับ</th>
-                        <th style="border: 1px solid #000; padding: 6px 4px; width: 75px; text-align: center; white-space: nowrap;">2. รหัสเอกสาร</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 90px; text-align: left; white-space: nowrap;">4. อำเภอ</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 85px; text-align: left; white-space: nowrap;">5. จังหวัด</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
-                        <th style="border: 1px solid #000; padding: 6px 4px; width: 70px; text-align: center; white-space: nowrap;">7. รหัสตัวอย่าง</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 140px; text-align: left; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="border: 1px solid #000; padding: 6px 6px; width: 175px; text-align: center; white-space: nowrap;">9. ผลตรวจ</th>
+                    <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 11pt;">
+                        <th style="width: 3.5%; text-align: center; padding: 5px 2px;">1. ลำดับ</th>
+                        <th style="width: 7.5%; text-align: center; padding: 5px 2px;">2. รหัสเอกสาร</th>
+                        <th style="width: 18%; text-align: left; padding: 5px 4px;">3. สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 8%; text-align: left; padding: 5px 4px;">4. อำเภอ</th>
+                        <th style="width: 7%; text-align: left; padding: 5px 4px;">5. จังหวัด</th>
+                        <th style="width: 16%; text-align: left; padding: 5px 4px;">6. ชื่อตัวอย่าง</th>
+                        <th style="width: 7%; text-align: center; padding: 5px 2px;">7. รหัสตัวอย่าง</th>
+                        <th style="width: 15%; text-align: left; padding: 5px 4px;">8. ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 18%; text-align: center; padding: 5px 4px;">9. ผลตรวจ</th>
                     </tr>
                 </thead>
             `;
         }
 
         const htmlContent = `
-            <div style="font-family: 'TH SarabunPSK', 'TH Sarabun New', 'Sarabun', sans-serif; padding: 6mm 6mm; color: #000; box-sizing: border-box;">
+            <style>
+                @page {
+                    size: A4 landscape !important;
+                    margin: 5mm 6mm !important;
+                }
+                @media print {
+                    @page {
+                        size: A4 landscape !important;
+                        margin: 5mm 6mm !important;
+                    }
+                    html, body {
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: #fff !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                }
+                * {
+                    box-sizing: border-box !important;
+                    font-family: 'TH SarabunPSK', 'TH Sarabun New', 'Sarabun', 'SarabunPDF', sans-serif !important;
+                }
+                .run-sheet-container {
+                    width: 100% !important;
+                    max-width: 285mm !important;
+                    margin: 0 auto !important;
+                    padding: 2mm 3mm !important;
+                    color: #000 !important;
+                    box-sizing: border-box !important;
+                }
+                table.run-sheet-table {
+                    width: 100% !important;
+                    border-collapse: collapse !important;
+                    table-layout: fixed !important;
+                    margin-top: 6px !important;
+                }
+                table.run-sheet-table th, table.run-sheet-table td {
+                    border: 1px solid #000 !important;
+                    box-sizing: border-box !important;
+                    word-break: break-word !important;
+                    overflow-wrap: break-word !important;
+                    vertical-align: middle !important;
+                }
+                thead {
+                    display: table-header-group !important;
+                }
+                tr {
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                }
+            </style>
+            <div class="run-sheet-container">
                 <!-- Header -->
-                <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 18pt; font-weight: bold; line-height: 1.2;">
+                <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 4px; margin-bottom: 8px;">
+                    <div style="font-size: 17pt; font-weight: bold; line-height: 1.2;">
                         ใบบันทึกผลการตรวจวิเคราะห์ทางห้องปฏิบัติการ (Lab Bench Run Sheet)
                     </div>
-                    <div style="font-size: 14pt; font-weight: 600; margin-top: 2px;">
+                    <div style="font-size: 13.5pt; font-weight: 600; margin-top: 1px;">
                         หน่วยเคลื่อนที่เพื่อความปลอดภัยด้านอาหาร เขตสุขภาพที่ 10 (Mobile Unit 10)
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12.5pt; padding: 0 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 11.5pt; padding: 0 4px;">
                         <div><strong>รหัสเอกสาร:</strong> ${formLabel}</div>
                         <div><strong>พื้นที่:</strong> ${provLabel}</div>
                         <div><strong>จำนวนตัวอย่าง:</strong> ${selectedItems.length} ตัวอย่าง</div>
@@ -5212,19 +5264,15 @@ document.getElementById('formNameTitle').innerText = title;
                 </div>
 
                 <!-- Run Sheet Table -->
-                <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-top: 6px;">
+                <table class="run-sheet-table">
                     ${tableHeadHtml}
-                    <tbody>
-                        ${rowsHtml}
-                    </tbody>
-                </table>
                     <tbody>
                         ${rowsHtml}
                     </tbody>
                 </table>
 
                 <!-- Signatures Footer -->
-                <div style="margin-top: 25px; display: flex; justify-content: space-around; page-break-inside: avoid; font-size: 12.5pt;">
+                <div style="margin-top: 18px; display: flex; justify-content: space-around; page-break-inside: avoid; break-inside: avoid; font-size: 12pt;">
                     <div style="text-align: center; width: 42%;">
                         <div>ลงชื่อ ................................................................ ผู้ตรวจวิเคราะห์</div>
                         <div style="margin-top: 4px;">( ................................................................ )</div>
@@ -5241,33 +5289,36 @@ document.getElementById('formNameTitle').innerText = title;
             </div>
         `;
 
-        this.printHtmlInFrame(htmlContent, 'Lab_Bench_Run_Sheet_' + formVal);
+        await this.printHtmlInFrame(htmlContent, 'Lab_Bench_Run_Sheet_' + formVal);
     },
 
-    printHtmlInFrame(htmlContent, title) {
+    async printHtmlInFrame(htmlContent, title) {
         let iframe = document.getElementById('submissionPdfPrintFrame');
         if (!iframe) {
             iframe = document.createElement('iframe');
             iframe.id = 'submissionPdfPrintFrame';
-            iframe.style.position = 'fixed';
-            iframe.style.right = '0';
-            iframe.style.bottom = '0';
-            iframe.style.width = '0';
-            iframe.style.height = '0';
-            iframe.style.border = '0';
-            iframe.style.opacity = '0';
-            iframe.style.pointerEvents = 'none';
-            iframe.style.zIndex = '-1';
             document.body.appendChild(iframe);
         }
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '1122px';
+        iframe.style.height = '793px';
+        iframe.style.border = '0';
+        iframe.style.opacity = '0';
+        iframe.style.pointerEvents = 'none';
+        iframe.style.zIndex = '-9999';
 
         try {
             const doc = iframe.contentWindow.document;
             doc.open();
-            doc.write('<html><head><base href="' + window.location.href + '"><title>' + title + '</title><link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="style_v3.css">' + this.getStandardPdfStyles('landscape') + '</head><body>');
+            doc.write('<!DOCTYPE html><html><head><base href="' + window.location.href + '"><title>' + title + '</title><link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="style_v3.css">' + this.getStandardPdfStyles('landscape') + '</head><body>');
             doc.write(htmlContent);
             doc.write('</body></html>');
             doc.close();
+
+            await this.waitForPdfAssets(doc);
+            await new Promise(r => setTimeout(r, 200));
 
             const originalTitle = document.title;
             document.title = title;
@@ -5286,16 +5337,14 @@ document.getElementById('formNameTitle').innerText = title;
                 setTimeout(restoreMainWindow, 100);
             };
 
-            setTimeout(() => {
-                try {
-                    iframe.contentWindow.focus();
-                    iframe.contentWindow.print();
-                } catch (ePrint) {
-                    console.error('print error:', ePrint);
-                } finally {
-                    setTimeout(restoreMainWindow, 500);
-                }
-            }, 150);
+            try {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            } catch (ePrint) {
+                console.error('print error:', ePrint);
+            } finally {
+                setTimeout(restoreMainWindow, 500);
+            }
         } catch (e) {
             console.error('print error:', e);
             window.print();
