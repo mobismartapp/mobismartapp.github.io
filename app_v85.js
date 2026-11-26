@@ -4667,6 +4667,34 @@ document.getElementById('formNameTitle').innerText = title;
                 const itemIdx = it.idx || (idx + 1);
                 const itemLabNo = this.getItemLabNo(s, itemIdx);
 
+                let hasGT = false;
+                let hasTM2 = false;
+                if (formType === 'MU.10-001') {
+                    if (s.test_gt_kit === 'on' || s.test_gt_kit === true || s.test_gt_kit === 'true' || s.test_organo === 'on' || s.test_carbamate === 'on' || s[`test_gt_kit_${itemIdx}`] === 'on' || s[`test_gt_kit_${itemIdx}`] === true) {
+                        hasGT = true;
+                    }
+                    if (s.test_tm_kit === 'on' || s.test_tm_kit === true || s.test_tm_kit === 'true' || s[`test_tm_kit_${itemIdx}`] === 'on' || s[`test_tm_kit_${itemIdx}`] === true) {
+                        hasTM2 = true;
+                    }
+                    const textPool = `${s.analysis_substance || ''} ${s.pesticide_test_type || ''} ${s.test_kit_type || ''} ${s.test_types || ''} ${it ? (it.test_type || it.tests || '') : ''}`.toUpperCase();
+                    if (textPool.includes('GT') || textPool.includes('ออร์กาโนฟอสเฟต') || textPool.includes('คาร์บาเมต')) {
+                        hasGT = true;
+                    }
+                    if (textPool.includes('TM/2') || textPool.includes('TM2') || textPool.includes('ไพเรทรอยด์') || textPool.includes('ออร์กาโนคลอรีน')) {
+                        hasTM2 = true;
+                    }
+                    if (!hasGT && !hasTM2) {
+                        hasGT = true;
+                    }
+                    if (hasGT && hasTM2) {
+                        defaultTest = 'สารเคมีกำจัดแมลง (GT Kit & TM/2 Kit)';
+                    } else if (hasTM2) {
+                        defaultTest = 'สารเคมีกำจัดแมลง (TM/2 Kit)';
+                    } else {
+                        defaultTest = 'สารเคมีกำจัดแมลง (GT Kit)';
+                    }
+                }
+
                 let mu2Tests = [];
                 if (formType === 'MU.10-002') {
                     if (s[`test_borax_${itemIdx}`] || (itemIdx === 1 && s.test_borax)) mu2Tests.push('borax');
@@ -4713,6 +4741,8 @@ document.getElementById('formNameTitle').innerText = title;
                     sample_name: it.name || s.sample_name || `ตัวอย่างที่ ${idx + 1}`,
                     lab_no: itemLabNo,
                     test_name: itemTest,
+                    hasGT: hasGT,
+                    hasTM2: hasTM2,
                     mu2Tests: mu2Tests,
                     sample_status: s.status,
                     created_at: s.created_at,
@@ -4882,6 +4912,38 @@ document.getElementById('formNameTitle').innerText = title;
                     </td>
                 `;
             } else if (formVal === 'MU.10-001') {
+                let testKitHtml = '';
+                let resultKitHtml = '';
+                if (item.hasGT && item.hasTM2) {
+                    testKitHtml = `
+                        <div><strong style="color:#0284c7;">[ ]</strong> GT Kit</div>
+                        <div style="margin-top:2px;"><strong style="color:#0284c7;">[ ]</strong> TM/2 Kit</div>
+                    `;
+                    resultKitHtml = `
+                        <div style="font-size: 11px; text-align: left; line-height: 1.4;">
+                            <div><strong style="color:#475569;">GT:</strong> <span><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</span> <span><strong style="color:#0284c7;">[ ]</strong> พบปลอดภัย</span> <span><strong style="color:#dc2626;">[ ]</strong> พบอันตราย</span></div>
+                            <div style="margin-top: 2px;"><strong style="color:#475569;">TM/2:</strong> <span><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</span> <span><strong style="color:#dc2626;">[ ]</strong> พบ</span></div>
+                        </div>
+                    `;
+                } else if (item.hasTM2) {
+                    testKitHtml = `<div><strong style="color:#0284c7;">[ ]</strong> TM/2 Kit</div>`;
+                    resultKitHtml = `
+                        <div style="display: inline-flex; align-items: center; gap: 12px;">
+                            <span><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</span>
+                            <span><strong style="color:#dc2626;">[ ]</strong> พบ</span>
+                        </div>
+                    `;
+                } else {
+                    testKitHtml = `<div><strong style="color:#0284c7;">[ ]</strong> GT Kit</div>`;
+                    resultKitHtml = `
+                        <div style="display: inline-flex; align-items: center; gap: 8px;">
+                            <span><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</span>
+                            <span><strong style="color:#0284c7;">[ ]</strong> พบปลอดภัย</span>
+                            <span><strong style="color:#dc2626;">[ ]</strong> พบอันตราย</span>
+                        </div>
+                    `;
+                }
+
                 tr.innerHTML = `
                     <td style="text-align: center; padding: 8px;">
                         <input type="checkbox" class="run-sheet-item-check" data-id="${item.uniqueId}" ${isChecked ? 'checked' : ''} onchange="app.toggleRunSheetItemCheck('${item.uniqueId}', this.checked)">
@@ -4903,20 +4965,23 @@ document.getElementById('formNameTitle').innerText = title;
                         </span>
                     </td>
                     <td style="padding: 8px 8px; font-size: 11.5px; color: #334155; line-height: 1.4; white-space: nowrap;">
-                        <div><strong style="color:#0284c7;">[ ]</strong> GT Kit</div>
-                        <div style="margin-top:2px;"><strong style="color:#0284c7;">[ ]</strong> TM/2 Kit</div>
+                        ${testKitHtml}
                     </td>
                     <td style="padding: 8px 10px; font-size: 11.5px; color: #334155; line-height: 1.4; white-space: nowrap; text-align: center; background: #fafafa;">
-                        <div style="display: inline-flex; align-items: center; gap: 8px;">
-                            <span><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</span>
-                            <span><strong style="color:#0284c7;">[ ]</strong> พบปลอดภัย</span>
-                            <span><strong style="color:#dc2626;">[ ]</strong> พบอันตราย</span>
-                        </div>
+                        ${resultKitHtml}
                     </td>
                 `;
             } else {
                 let resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ผ่าน &nbsp; [ ] ตก</span>';
-                if (item.form_type === 'MU.10-002') {
+                if (item.form_type === 'MU.10-001') {
+                    if (item.hasGT && item.hasTM2) {
+                        resultDisplay = '<div style="font-size:11px; text-align:left; line-height:1.3;"><div><strong>GT:</strong> [ ] ไม่พบ [ ] พบปลอดภัย [ ] พบอันตราย</div><div style="margin-top:2px;"><strong>TM/2:</strong> [ ] ไม่พบ [ ] พบ</div></div>';
+                    } else if (item.hasTM2) {
+                        resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;"><strong style="color:#16a34a;">[ ]</strong> ไม่พบ &nbsp;&nbsp; <strong style="color:#dc2626;">[ ]</strong> พบ</span>';
+                    } else {
+                        resultDisplay = '<div style="display:inline-flex; gap:6px; font-size:11.5px;"><span>[ ] ไม่พบ</span> <span>[ ] พบปลอดภัย</span> <span>[ ] พบอันตราย</span></div>';
+                    }
+                } else if (item.form_type === 'MU.10-002') {
                     resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;"><strong style="color:#16a34a;">[ ]</strong> ไม่พบ &nbsp;&nbsp; <strong style="color:#dc2626;">[ ]</strong> พบ</span>';
                 } else if (item.form_type === 'MU.10-003') {
                     resultDisplay = '<div style="font-size:11.5px; line-height:1.3;"><span style="color:#64748b;">ค่าโพลาร์:</span> ____ %<br><strong style="color:#0284c7;">[ ] ≤25% (ผ่าน) &nbsp; [ ] >25% (ตก)</strong></div>';
@@ -5080,6 +5145,38 @@ document.getElementById('formNameTitle').innerText = title;
             }
 
             if (isMu001) {
+                let testKitPrintHtml = '';
+                let resultKitPrintHtml = '';
+                if (item.hasGT && item.hasTM2) {
+                    testKitPrintHtml = `
+                        <div>[ &nbsp; ] ยาฆ่าแมลง (GT Kit)</div>
+                        <div style="margin-top: 1px;">[ &nbsp; ] ยาฆ่าแมลง (TM/2 Kit)</div>
+                    `;
+                    resultKitPrintHtml = `
+                        <div style="font-size: 8pt; line-height: 1.25; text-align: left; padding-left: 2px;">
+                            <div><span style="font-weight:700;">GT:</span> [ &nbsp; ] ไม่พบ &nbsp; [ &nbsp; ] พบปลอดภัย &nbsp; [ &nbsp; ] พบอันตราย</div>
+                            <div style="margin-top: 1px;"><span style="font-weight:700;">TM/2:</span> [ &nbsp; ] ไม่พบ &nbsp; [ &nbsp; ] พบ</div>
+                        </div>
+                    `;
+                } else if (item.hasTM2) {
+                    testKitPrintHtml = `<div>[ &nbsp; ] ยาฆ่าแมลง (TM/2 Kit)</div>`;
+                    resultKitPrintHtml = `
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 14px; white-space: nowrap; font-size: 10pt;">
+                            <span>[ &nbsp; ] ไม่พบ</span>
+                            <span>[ &nbsp; ] พบ</span>
+                        </div>
+                    `;
+                } else {
+                    testKitPrintHtml = `<div>[ &nbsp; ] ยาฆ่าแมลง (GT Kit)</div>`;
+                    resultKitPrintHtml = `
+                        <div style="display: flex; justify-content: space-around; align-items: center; white-space: nowrap; font-size: 9.5pt;">
+                            <span>[ &nbsp; ] ไม่พบ</span>
+                            <span>[ &nbsp; ] พบปลอดภัย</span>
+                            <span>[ &nbsp; ] พบอันตราย</span>
+                        </div>
+                    `;
+                }
+
                 return `
                     <tr style="page-break-inside: avoid; break-inside: avoid; border-bottom: 1px solid #000;">
                         <td style="padding: 3px 2px; text-align: center; font-weight: bold; font-size: 10.5pt;">${idx + 1}</td>
@@ -5090,16 +5187,11 @@ document.getElementById('formNameTitle').innerText = title;
                         <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.15;">${item.distributor || '-'}</td>
                         <td style="padding: 3px 4px; font-weight: 600; font-size: 10pt; line-height: 1.15;">${item.sample_name}</td>
                         <td style="padding: 3px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt;">${item.lab_no}</td>
-                        <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.2;">
-                            <div>[ &nbsp; ] ยาฆ่าแมลง (GT Kit)</div>
-                            <div style="margin-top: 1px;">[ &nbsp; ] ยาฆ่าแมลง (TM/2 Kit)</div>
+                        <td style="padding: 3px 4px; font-size: 9pt; line-height: 1.2;">
+                            ${testKitPrintHtml}
                         </td>
                         <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.2; text-align: center;">
-                            <div style="display: flex; justify-content: space-around; align-items: center; white-space: nowrap;">
-                                <span>[ &nbsp; ] ไม่พบ</span>
-                                <span>[ &nbsp; ] พบปลอดภัย</span>
-                                <span>[ &nbsp; ] พบอันตราย</span>
-                            </div>
+                            ${resultKitPrintHtml}
                         </td>
                     </tr>
                 `;
@@ -5111,7 +5203,31 @@ document.getElementById('formNameTitle').innerText = title;
                     <span>[ &nbsp; ] ตก</span>
                 </div>
             `;
-            if (item.form_type === 'MU.10-002') {
+            if (item.form_type === 'MU.10-001') {
+                if (item.hasGT && item.hasTM2) {
+                    resultCell = `
+                        <div style="font-size: 8pt; line-height: 1.25; text-align: left; padding-left: 2px;">
+                            <div><span style="font-weight:700;">GT:</span> [ &nbsp; ] ไม่พบ &nbsp; [ &nbsp; ] พบปลอดภัย &nbsp; [ &nbsp; ] พบอันตราย</div>
+                            <div style="margin-top: 1px;"><span style="font-weight:700;">TM/2:</span> [ &nbsp; ] ไม่พบ &nbsp; [ &nbsp; ] พบ</div>
+                        </div>
+                    `;
+                } else if (item.hasTM2) {
+                    resultCell = `
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 14px; white-space: nowrap; font-size: 10pt;">
+                            <span>[ &nbsp; ] ไม่พบ</span>
+                            <span>[ &nbsp; ] พบ</span>
+                        </div>
+                    `;
+                } else {
+                    resultCell = `
+                        <div style="display: flex; justify-content: space-around; align-items: center; white-space: nowrap; font-size: 9.5pt;">
+                            <span>[ &nbsp; ] ไม่พบ</span>
+                            <span>[ &nbsp; ] พบปลอดภัย</span>
+                            <span>[ &nbsp; ] พบอันตราย</span>
+                        </div>
+                    `;
+                }
+            } else if (item.form_type === 'MU.10-002') {
                 resultCell = `
                     <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10pt;">
                         <span>[ &nbsp; ] ไม่พบ</span>
