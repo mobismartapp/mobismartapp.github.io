@@ -4681,7 +4681,7 @@ document.getElementById('formNameTitle').innerText = title;
         const provVal = document.getElementById('runSheetFilterProvince') ? document.getElementById('runSheetFilterProvince').value : 'ALL';
         const searchVal = document.getElementById('runSheetSearch') ? document.getElementById('runSheetSearch').value.toLowerCase().trim() : '';
 
-        // Dynamically update thead if MU.10-001 is selected (เพิ่มช่องการแปลผล, ผลตรวจ, สรุปผล ตามแบบบันทึกตัวอย่าง)
+        // Dynamically update thead if MU.10-001 is selected (เพิ่มช่องการแปลผล, ผลตรวจ ตามแบบบันทึกตัวอย่าง)
         const thead = document.getElementById('runSheetThead');
         if (thead) {
             if (formVal === 'MU.10-001') {
@@ -4690,17 +4690,16 @@ document.getElementById('formNameTitle').innerText = title;
                         <th style="width: 45px; text-align: center; padding: 10px 8px;">
                             <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
                         </th>
-                        <th style="width: 45px; text-align: center; padding: 10px 6px;">1. ลำดับ</th>
-                        <th style="width: 85px; text-align: center; padding: 10px 6px;">2. รหัสเอกสาร</th>
+                        <th style="width: 50px; text-align: center; padding: 10px 6px;">1. ลำดับ</th>
+                        <th style="width: 90px; text-align: center; padding: 10px 6px;">2. รหัสเอกสาร</th>
                         <th style="padding: 10px 10px;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 95px; padding: 10px 8px;">4. อำเภอ</th>
-                        <th style="width: 85px; padding: 10px 8px;">5. จังหวัด</th>
+                        <th style="width: 100px; padding: 10px 8px;">4. อำเภอ</th>
+                        <th style="width: 90px; padding: 10px 8px;">5. จังหวัด</th>
                         <th style="padding: 10px 10px;">6. ชื่อตัวอย่าง</th>
-                        <th style="width: 75px; text-align: center; padding: 10px 6px;">7. รหัสตัวอย่าง</th>
-                        <th style="width: 125px; padding: 10px 8px;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="width: 180px; padding: 10px 8px;">9. การแปลผล</th>
-                        <th style="width: 110px; padding: 10px 8px;">10. ผลตรวจ</th>
-                        <th style="width: 80px; text-align: center; padding: 10px 6px;">11. สรุปผล</th>
+                        <th style="width: 80px; text-align: center; padding: 10px 6px;">7. รหัสตัวอย่าง</th>
+                        <th style="width: 130px; padding: 10px 8px;">8. ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 200px; padding: 10px 8px;">9. การแปลผล</th>
+                        <th style="width: 120px; padding: 10px 8px;">10. ผลตรวจ</th>
                     </tr>
                 `;
             } else {
@@ -4790,10 +4789,6 @@ document.getElementById('formNameTitle').innerText = title;
                         <div><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</div>
                         <div style="margin-top:1px;"><strong style="color:#0284c7;">[ ]</strong> พบปลอดภัย</div>
                         <div style="margin-top:1px;"><strong style="color:#dc2626;">[ ]</strong> พบอันตราย</div>
-                    </td>
-                    <td style="text-align: center; padding: 8px; font-size: 12px; line-height: 1.35;">
-                        <div style="color: #16a34a; font-weight: 700;">[ ] ผ่าน</div>
-                        <div style="color: #dc2626; font-weight: 700; margin-top: 2px;">[ ] ไม่ผ่าน</div>
                     </td>
                 `;
             } else {
@@ -4930,10 +4925,6 @@ document.getElementById('formNameTitle').innerText = title;
                             <div style="margin-top: 1px;">[ &nbsp; ] พบปลอดภัย</div>
                             <div style="margin-top: 1px;">[ &nbsp; ] พบอันตราย</div>
                         </td>
-                        <td style="border: 1px solid #333; padding: 5px 3px; font-size: 10.5pt; line-height: 1.25; text-align: center;">
-                            <div>[ &nbsp; ] ผ่าน</div>
-                            <div style="margin-top: 2px;">[ &nbsp; ] ไม่ผ่าน</div>
-                        </td>
                     </tr>
                 `;
             }
@@ -5011,14 +5002,13 @@ document.getElementById('formNameTitle').innerText = title;
                     <th style="border: 1px solid #000; padding: 5px 2px; width: 30px; text-align: center;">ลำดับ</th>
                     <th style="border: 1px solid #000; padding: 5px 3px; width: 65px; text-align: center;">รหัสเอกสาร</th>
                     <th style="border: 1px solid #000; padding: 5px 4px; text-align: left;">สถานที่เก็บตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 75px; text-align: left;">อำเภอ</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 70px; text-align: left;">จังหวัด</th>
+                    <th style="border: 1px solid #000; padding: 5px 4px; width: 80px; text-align: left;">อำเภอ</th>
+                    <th style="border: 1px solid #000; padding: 5px 4px; width: 75px; text-align: left;">จังหวัด</th>
                     <th style="border: 1px solid #000; padding: 5px 4px; text-align: left;">ชื่อตัวอย่าง</th>
                     <th style="border: 1px solid #000; padding: 5px 2px; width: 55px; text-align: center;">รหัสตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 95px; text-align: left;">ชุดทดสอบที่ตรวจ</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 175px; text-align: left;">การแปลผล</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 85px; text-align: left;">ผลตรวจ</th>
-                    <th style="border: 1px solid #000; padding: 5px 4px; width: 65px; text-align: center;">สรุปผล</th>
+                    <th style="border: 1px solid #000; padding: 5px 4px; width: 105px; text-align: left;">ชุดทดสอบที่ตรวจ</th>
+                    <th style="border: 1px solid #000; padding: 5px 4px; width: 185px; text-align: left;">การแปลผล</th>
+                    <th style="border: 1px solid #000; padding: 5px 4px; width: 95px; text-align: left;">ผลตรวจ</th>
                 </tr>
             </thead>
         ` : `
