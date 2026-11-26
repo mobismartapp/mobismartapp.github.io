@@ -374,6 +374,10 @@ const app = {
             const session = sessionStorage.getItem('sskmoph_session');
             if (session) {
                 this.currentUser = JSON.parse(session);
+                if (this.currentUser && (this.currentUser.username === 'certifier' || this.currentUser.fullname === 'ดร.ผู้รับรอง ตรวจสอบดี')) {
+                    this.currentUser.fullname = 'ภญ.ฐิติพร อินศร';
+                    sessionStorage.setItem('sskmoph_session', JSON.stringify(this.currentUser));
+                }
             }
         } catch (e) {
             this.currentUser = null;
@@ -386,7 +390,7 @@ const app = {
                 this.users = [
                     { username: 'admin', password: 'password', role: 'admin', fullname: 'Admin Mobile Unit 10', status: 'approved' },
                     { username: 'lab', password: 'password', role: 'lab', fullname: 'นสพ.วิทยา รักดี', status: 'approved' },
-                    { username: 'certifier', password: 'Certifier@2027!', role: 'certifier', fullname: 'ดร.ผู้รับรอง ตรวจสอบดี', position: 'ผู้รับรองผลตรวจวิเคราะห์', status: 'approved' },
+                    { username: 'certifier', password: 'Certifier@2027!', role: 'certifier', fullname: 'ภญ.ฐิติพร อินศร', position: 'ผู้รับรองผลตรวจวิเคราะห์', status: 'approved' },
                     { username: 'user', password: 'password', role: 'collector', fullname: 'นายสมคิด สุขใจ', status: 'approved' },
                     { username: 'anchasa', password: 'anchasa@241138', role: 'collector', fullname: 'นางสาว อัญชสา ใจดี', status: 'approved', workplace: 'รพ.ศรีสะเกษ', province: 'ศรีสะเกษ', createdAt: new Date().toISOString() }
                 ];
@@ -398,6 +402,10 @@ const app = {
                 this.users.forEach(u => {
                     if (u && (u.username === 'certifier' || u.role === 'certifier')) {
                         certFound = true;
+                        if (u.fullname === 'ดร.ผู้รับรอง ตรวจสอบดี' || !u.fullname) {
+                            u.fullname = 'ภญ.ฐิติพร อินศร';
+                            migrated = true;
+                        }
                         if (u.password === 'password' || !this.validateStrongPassword(u.password).valid) {
                             u.password = 'Certifier@2027!';
                             migrated = true;
@@ -409,7 +417,7 @@ const app = {
                         username: 'certifier',
                         password: 'Certifier@2027!',
                         role: 'certifier',
-                        fullname: 'ดร.ผู้รับรอง ตรวจสอบดี',
+                        fullname: 'ภญ.ฐิติพร อินศร',
                         position: 'ผู้รับรองผลตรวจวิเคราะห์',
                         status: 'approved'
                     });
@@ -430,12 +438,20 @@ const app = {
             const data = snapshot.val();
             if (data) {
                 this.users = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
-                // Migrate certifier password to Certifier@2027! in Firebase if legacy 'password'
+                // Migrate certifier password and fullname in Firebase if needed
                 this.users.forEach(u => {
                     if (u && (u.username === 'certifier' || u.role === 'certifier')) {
+                        const updates = {};
+                        if (u.fullname === 'ดร.ผู้รับรอง ตรวจสอบดี' || !u.fullname) {
+                            u.fullname = 'ภญ.ฐิติพร อินศร';
+                            updates.fullname = 'ภญ.ฐิติพร อินศร';
+                        }
                         if (u.password === 'password' || !this.validateStrongPassword(u.password).valid) {
                             u.password = 'Certifier@2027!';
-                            if (u.uid) db.ref('users/' + u.uid).update({ password: 'Certifier@2027!' });
+                            updates.password = 'Certifier@2027!';
+                        }
+                        if (u.uid && Object.keys(updates).length > 0) {
+                            db.ref('users/' + u.uid).update(updates);
                         }
                     }
                 });
@@ -465,6 +481,9 @@ const app = {
                     this.users = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
                     this.users.forEach(u => {
                         if (u && (u.username === 'certifier' || u.role === 'certifier')) {
+                            if (u.fullname === 'ดร.ผู้รับรอง ตรวจสอบดี' || !u.fullname) {
+                                u.fullname = 'ภญ.ฐิติพร อินศร';
+                            }
                             if (u.password === 'password' || !this.validateStrongPassword(u.password).valid) {
                                 u.password = 'Certifier@2027!';
                             }
@@ -1499,6 +1518,66 @@ const app = {
         if (btn) {
             btn.style.setProperty('display', canEditApproval ? 'inline-flex' : 'none', 'important');
         }
+    },
+
+    showContactModal() {
+        Swal.fire({
+            title: '',
+            html: `
+                <div style="text-align: center; padding: 4px;">
+                    <img src="contact_mu10.jpg" alt="ช่องทางติดต่อ mobile Unit 10" style="width: 100%; max-width: 720px; height: auto; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); margin-bottom: 16px; display: block;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; text-align: left; font-size: 13px;">
+                        <a href="https://mobile10.ssko.moph.go.th/" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; color: #0284c7; text-decoration: none; font-weight: 500;">
+                            <i class="fa-solid fa-globe" style="font-size: 16px;"></i>
+                            <div>
+                                <div style="font-size: 11px; color: #64748b;">เว็บไซต์</div>
+                                <div style="font-weight: 600;">mobile10.ssko.moph.go.th</div>
+                            </div>
+                        </a>
+                        <a href="https://www.facebook.com/search/top?q=MU%2010%20On%20Tour" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; color: #1d4ed8; text-decoration: none; font-weight: 500;">
+                            <i class="fa-brands fa-facebook" style="font-size: 18px;"></i>
+                            <div>
+                                <div style="font-size: 11px; color: #64748b;">Facebook</div>
+                                <div style="font-weight: 600;">MU 10 On Tour</div>
+                            </div>
+                        </a>
+                        <a href="https://line.me/R/ti/p/@972ngmsl" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; color: #16a34a; text-decoration: none; font-weight: 500;">
+                            <i class="fa-brands fa-line" style="font-size: 20px;"></i>
+                            <div>
+                                <div style="font-size: 11px; color: #64748b;">Line Official</div>
+                                <div style="font-weight: 600;">@972ngmsl</div>
+                            </div>
+                        </a>
+                        <a href="mailto:mobileunit10.ssk@gmail.com" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 10px; color: #d97706; text-decoration: none; font-weight: 500;">
+                            <i class="fa-solid fa-envelope" style="font-size: 16px;"></i>
+                            <div>
+                                <div style="font-size: 11px; color: #64748b;">E-mail</div>
+                                <div style="font-weight: 600;">mobileunit10.ssk@gmail.com</div>
+                            </div>
+                        </a>
+                        <a href="tel:045616040" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 10px; color: #db2777; text-decoration: none; font-weight: 500;">
+                            <i class="fa-solid fa-phone" style="font-size: 16px;"></i>
+                            <div>
+                                <div style="font-size: 11px; color: #64748b;">โทรศัพท์</div>
+                                <div style="font-weight: 600;">045-616040 ต่อ 305</div>
+                            </div>
+                        </a>
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; color: #334155; grid-column: 1 / -1;">
+                            <i class="fa-solid fa-location-dot" style="font-size: 16px; color: #ef4444;"></i>
+                            <div style="font-size: 12.5px;">
+                                <div style="font-size: 11px; color: #64748b; font-weight: 600;">ตำแหน่งที่ตั้งห้องปฏิบัติการฯ</div>
+                                <div>485 หมู่ 6 ตำบลโพนข่า อำเภอเมืองศรีสะเกษ จังหวัดศรีสะเกษ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            width: '760px',
+            padding: '16px',
+            showCloseButton: true,
+            confirmButtonText: 'ปิดหน้าต่าง',
+            confirmButtonColor: '#0284c7'
+        });
     },
 
     showLoginModal(intendedRole = '') {
