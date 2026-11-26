@@ -4745,16 +4745,16 @@ document.getElementById('formNameTitle').innerText = title;
                         <th style="width: 45px; text-align: center; padding: 10px 8px; white-space: nowrap;">
                             <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
                         </th>
-                        <th style="width: 50px; text-align: center; padding: 10px 6px; white-space: nowrap;">1. ลำดับ</th>
-                        <th style="width: 90px; text-align: center; padding: 10px 6px; white-space: nowrap;">2. รหัสเอกสาร</th>
-                        <th style="padding: 10px 10px; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 100px; padding: 10px 8px; white-space: nowrap;">4. อำเภอ</th>
-                        <th style="width: 90px; padding: 10px 8px; white-space: nowrap;">5. จังหวัด</th>
-                        <th style="padding: 10px 10px; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
-                        <th style="width: 80px; text-align: center; padding: 10px 6px; white-space: nowrap;">7. รหัสตัวอย่าง</th>
-                        <th style="width: 130px; padding: 10px 8px; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="min-width: 220px; padding: 10px 8px; white-space: nowrap;">9. การแปลผล</th>
-                        <th style="width: 130px; text-align: center; padding: 10px 8px; white-space: nowrap;">10. ผลตรวจ</th>
+                        <th style="width: 50px; text-align: center; padding: 10px 6px; white-space: nowrap;">ลำดับ</th>
+                        <th style="width: 90px; text-align: center; padding: 10px 6px; white-space: nowrap;">รหัสเอกสาร</th>
+                        <th style="padding: 10px 10px; white-space: nowrap;">สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 100px; padding: 10px 8px; white-space: nowrap;">อำเภอ</th>
+                        <th style="width: 90px; padding: 10px 8px; white-space: nowrap;">จังหวัด</th>
+                        <th style="padding: 10px 10px; white-space: nowrap;">ชื่อตัวอย่าง</th>
+                        <th style="width: 80px; text-align: center; padding: 10px 6px; white-space: nowrap;">รหัสตัวอย่าง</th>
+                        <th style="width: 130px; padding: 10px 8px; white-space: nowrap;">ชุดทดสอบที่ตรวจ</th>
+                        <th style="min-width: 220px; padding: 10px 8px; white-space: nowrap;">การแปลผล</th>
+                        <th style="width: 130px; text-align: center; padding: 10px 8px; white-space: nowrap;">ผลตรวจ</th>
                     </tr>
                 `;
             } else {
@@ -4763,15 +4763,15 @@ document.getElementById('formNameTitle').innerText = title;
                         <th style="width: 45px; text-align: center; padding: 10px 8px; white-space: nowrap;">
                             <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
                         </th>
-                        <th style="width: 50px; text-align: center; padding: 10px 8px; white-space: nowrap;">1. ลำดับ</th>
-                        <th style="width: 95px; text-align: center; padding: 10px 8px; white-space: nowrap;">2. รหัสเอกสาร</th>
-                        <th style="padding: 10px 12px; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 110px; padding: 10px 10px; white-space: nowrap;">4. อำเภอ</th>
-                        <th style="width: 100px; padding: 10px 10px; white-space: nowrap;">5. จังหวัด</th>
-                        <th style="padding: 10px 12px; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
-                        <th style="width: 85px; text-align: center; padding: 10px 8px; white-space: nowrap;">7. รหัสตัวอย่าง</th>
-                        <th style="width: 140px; padding: 10px 10px; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="width: 170px; text-align: center; padding: 10px 8px; white-space: nowrap;">9. ผลตรวจ</th>
+                        <th style="width: 50px; text-align: center; padding: 10px 8px; white-space: nowrap;">ลำดับ</th>
+                        <th style="width: 95px; text-align: center; padding: 10px 8px; white-space: nowrap;">รหัสเอกสาร</th>
+                        <th style="padding: 10px 12px; white-space: nowrap;">สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 110px; padding: 10px 10px; white-space: nowrap;">อำเภอ</th>
+                        <th style="width: 100px; padding: 10px 10px; white-space: nowrap;">จังหวัด</th>
+                        <th style="padding: 10px 12px; white-space: nowrap;">ชื่อตัวอย่าง</th>
+                        <th style="width: 85px; text-align: center; padding: 10px 8px; white-space: nowrap;">รหัสตัวอย่าง</th>
+                        <th style="width: 140px; padding: 10px 10px; white-space: nowrap;">ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 170px; text-align: center; padding: 10px 8px; white-space: nowrap;">ผลตรวจ</th>
                     </tr>
                 `;
             }
@@ -5162,16 +5162,16 @@ document.getElementById('formNameTitle').innerText = title;
             tableHeadHtml = `
                 <thead>
                     <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 10.5pt;">
-                        <th style="width: 3.5%; text-align: center; padding: 4px 2px;">1. ลำดับ</th>
-                        <th style="width: 7%; text-align: center; padding: 4px 2px;">2. รหัสเอกสาร</th>
-                        <th style="width: 16%; text-align: left; padding: 4px 4px;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 7.5%; text-align: left; padding: 4px 4px;">4. อำเภอ</th>
-                        <th style="width: 6.5%; text-align: left; padding: 4px 4px;">5. จังหวัด</th>
-                        <th style="width: 14.5%; text-align: left; padding: 4px 4px;">6. ชื่อตัวอย่าง</th>
-                        <th style="width: 6.5%; text-align: center; padding: 4px 2px;">7. รหัสตัวอย่าง</th>
-                        <th style="width: 13%; text-align: left; padding: 4px 4px;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="width: 14.5%; text-align: left; padding: 4px 4px;">9. การแปลผล</th>
-                        <th style="width: 11%; text-align: center; padding: 4px 4px;">10. ผลตรวจ</th>
+                        <th style="width: 3.5%; text-align: center; padding: 4px 2px;">ลำดับ</th>
+                        <th style="width: 7%; text-align: center; padding: 4px 2px;">รหัสเอกสาร</th>
+                        <th style="width: 16%; text-align: left; padding: 4px 4px;">สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 7.5%; text-align: left; padding: 4px 4px;">อำเภอ</th>
+                        <th style="width: 6.5%; text-align: left; padding: 4px 4px;">จังหวัด</th>
+                        <th style="width: 14.5%; text-align: left; padding: 4px 4px;">ชื่อตัวอย่าง</th>
+                        <th style="width: 6.5%; text-align: center; padding: 4px 2px;">รหัสตัวอย่าง</th>
+                        <th style="width: 13%; text-align: left; padding: 4px 4px;">ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 14.5%; text-align: left; padding: 4px 4px;">การแปลผล</th>
+                        <th style="width: 11%; text-align: center; padding: 4px 4px;">ผลตรวจ</th>
                     </tr>
                 </thead>
             `;
@@ -5179,15 +5179,15 @@ document.getElementById('formNameTitle').innerText = title;
             tableHeadHtml = `
                 <thead>
                     <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 10.5pt;">
-                        <th style="width: 3.5%; text-align: center; padding: 4px 2px;">1. ลำดับ</th>
-                        <th style="width: 7.5%; text-align: center; padding: 4px 2px;">2. รหัสเอกสาร</th>
-                        <th style="width: 18%; text-align: left; padding: 4px 4px;">3. สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 8%; text-align: left; padding: 4px 4px;">4. อำเภอ</th>
-                        <th style="width: 7%; text-align: left; padding: 4px 4px;">5. จังหวัด</th>
-                        <th style="width: 16%; text-align: left; padding: 4px 4px;">6. ชื่อตัวอย่าง</th>
-                        <th style="width: 7%; text-align: center; padding: 4px 2px;">7. รหัสตัวอย่าง</th>
-                        <th style="width: 15%; text-align: left; padding: 4px 4px;">8. ชุดทดสอบที่ตรวจ</th>
-                        <th style="width: 18%; text-align: center; padding: 4px 4px;">9. ผลตรวจ</th>
+                        <th style="width: 3.5%; text-align: center; padding: 4px 2px;">ลำดับ</th>
+                        <th style="width: 7.5%; text-align: center; padding: 4px 2px;">รหัสเอกสาร</th>
+                        <th style="width: 18%; text-align: left; padding: 4px 4px;">สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 8%; text-align: left; padding: 4px 4px;">อำเภอ</th>
+                        <th style="width: 7%; text-align: left; padding: 4px 4px;">จังหวัด</th>
+                        <th style="width: 16%; text-align: left; padding: 4px 4px;">ชื่อตัวอย่าง</th>
+                        <th style="width: 7%; text-align: center; padding: 4px 2px;">รหัสตัวอย่าง</th>
+                        <th style="width: 15%; text-align: left; padding: 4px 4px;">ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 18%; text-align: center; padding: 4px 4px;">ผลตรวจ</th>
                     </tr>
                 </thead>
             `;
