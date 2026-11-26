@@ -3933,7 +3933,8 @@ document.getElementById('formNameTitle').innerText = title;
         if (Array.isArray(sample.items) && sample.items.length > 0) {
             return sample.items.filter(it => it && it.item_status !== 'rejected').map((it, i) => ({
                 idx: it.idx || (i + 1),
-                name: it.name || it.sample_name || `ตัวอย่างที่ ${i + 1}`
+                name: it.name || it.sample_name || `ตัวอย่างที่ ${i + 1}`,
+                distributor: it.distributor || it.seller || sample[`distributor_${it.idx || (i + 1)}`] || sample.distributor || ''
             }));
         }
 
@@ -3952,7 +3953,8 @@ document.getElementById('formNameTitle').innerText = title;
                         const dateStr = sample['item_sampling_date_' + i] ? ` (${new Date(sample['item_sampling_date_' + i]).toLocaleDateString('th-TH')})` : '';
                         items.push({
                             idx: i,
-                            name: (sample['sample_name_' + i] || defName) + dateStr
+                            name: (sample['sample_name_' + i] || defName) + dateStr,
+                            distributor: sample['distributor_' + i] || sample.distributor || sample.vendor || sample.seller || ''
                         });
                     }
                 }
@@ -3984,7 +3986,8 @@ document.getElementById('formNameTitle').innerText = title;
                 }
                 items.push({
                     idx: i,
-                    name: String(displayName).trim()
+                    name: String(displayName).trim(),
+                    distributor: dist || sample.distributor || sample.shop_name || sample.vendor || sample.seller || ''
                 });
             }
         }
@@ -3997,7 +4000,8 @@ document.getElementById('formNameTitle').innerText = title;
             for (let k = 1; k <= qty; k++) {
                 items.push({
                     idx: k,
-                    name: (sample.sample_name || 'ตัวอย่าง') + ` #${k}`
+                    name: (sample.sample_name || 'ตัวอย่าง') + ` #${k}`,
+                    distributor: sample.distributor || sample.shop_name || sample.vendor || sample.seller || ''
                 });
             }
             return items;
@@ -4007,7 +4011,8 @@ document.getElementById('formNameTitle').innerText = title;
         if (sample.sample_name || sample.lab_no || sample.lab_id || sample.ref_id) {
             items.push({
                 idx: 1,
-                name: sample.sample_name || 'ตัวอย่างที่ 1'
+                name: sample.sample_name || 'ตัวอย่างที่ 1',
+                distributor: sample.distributor || sample.shop_name || sample.vendor || sample.seller || ''
             });
         }
 
@@ -4694,6 +4699,8 @@ document.getElementById('formNameTitle').innerText = title;
                 }
                 if (Array.isArray(itemTest)) itemTest = itemTest.join(', ');
 
+                const itemDistributor = it.distributor || s[`distributor_${itemIdx}`] || s.distributor || s.seller || s.vendor || s.shop_name || '-';
+
                 allItems.push({
                     uniqueId: `${s.ref_id}_${itemIdx}`,
                     itemIdx: itemIdx,
@@ -4702,6 +4709,7 @@ document.getElementById('formNameTitle').innerText = title;
                     location_name: locationName,
                     district: district,
                     province: province,
+                    distributor: (itemDistributor && String(itemDistributor).trim()) || '-',
                     sample_name: it.name || s.sample_name || `ตัวอย่างที่ ${idx + 1}`,
                     lab_no: itemLabNo,
                     test_name: itemTest,
@@ -4736,7 +4744,7 @@ document.getElementById('formNameTitle').innerText = title;
         const provVal = document.getElementById('runSheetFilterProvince') ? document.getElementById('runSheetFilterProvince').value : 'ALL';
         const searchVal = document.getElementById('runSheetSearch') ? document.getElementById('runSheetSearch').value.toLowerCase().trim() : '';
 
-        // Thead header with dynamic columns (MU.10-002 has 10 columns including 'การแปลผล', others have 9 columns)
+        // Thead header with dynamic columns (MU.10-002 has 11 columns including 'ผู้จำหน่าย' & 'การแปลผล', others have 10 columns)
         const thead = document.getElementById('runSheetThead');
         if (thead) {
             if (formVal === 'MU.10-002') {
@@ -4750,6 +4758,7 @@ document.getElementById('formNameTitle').innerText = title;
                         <th style="padding: 10px 10px; white-space: nowrap;">สถานที่เก็บตัวอย่าง</th>
                         <th style="width: 100px; padding: 10px 8px; white-space: nowrap;">อำเภอ</th>
                         <th style="width: 90px; padding: 10px 8px; white-space: nowrap;">จังหวัด</th>
+                        <th style="padding: 10px 10px; white-space: nowrap;">ผู้จำหน่าย</th>
                         <th style="padding: 10px 10px; white-space: nowrap;">ชื่อตัวอย่าง</th>
                         <th style="width: 80px; text-align: center; padding: 10px 6px; white-space: nowrap;">รหัสตัวอย่าง</th>
                         <th style="width: 130px; padding: 10px 8px; white-space: nowrap;">ชุดทดสอบที่ตรวจ</th>
@@ -4768,6 +4777,7 @@ document.getElementById('formNameTitle').innerText = title;
                         <th style="padding: 10px 12px; white-space: nowrap;">สถานที่เก็บตัวอย่าง</th>
                         <th style="width: 110px; padding: 10px 10px; white-space: nowrap;">อำเภอ</th>
                         <th style="width: 100px; padding: 10px 10px; white-space: nowrap;">จังหวัด</th>
+                        <th style="padding: 10px 12px; white-space: nowrap;">ผู้จำหน่าย</th>
                         <th style="padding: 10px 12px; white-space: nowrap;">ชื่อตัวอย่าง</th>
                         <th style="width: 85px; text-align: center; padding: 10px 8px; white-space: nowrap;">รหัสตัวอย่าง</th>
                         <th style="width: 140px; padding: 10px 10px; white-space: nowrap;">ชุดทดสอบที่ตรวจ</th>
@@ -4782,7 +4792,7 @@ document.getElementById('formNameTitle').innerText = title;
             if (formVal !== 'ALL' && item.form_type !== formVal) return false;
             if (provVal !== 'ALL' && !(item.province || '').includes(provVal)) return false;
             if (searchVal) {
-                const combined = `${item.lab_no || ''} ${item.sample_name || ''} ${item.location_name || ''} ${item.district || ''} ${item.province || ''} ${item.test_name || ''} ${item.form_type || ''}`.toLowerCase();
+                const combined = `${item.lab_no || ''} ${item.sample_name || ''} ${item.location_name || ''} ${item.district || ''} ${item.province || ''} ${item.distributor || ''} ${item.test_name || ''} ${item.form_type || ''}`.toLowerCase();
                 if (!combined.includes(searchVal)) return false;
             }
             return true;
@@ -4799,7 +4809,7 @@ document.getElementById('formNameTitle').innerText = title;
 
         tbody.innerHTML = '';
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="${formVal === 'MU.10-002' ? '11' : '10'}" style="text-align: center; padding: 32px; color: #64748b; font-weight: 600;">ไม่พบรายการตัวอย่างตามเงื่อนไขที่เลือก</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${formVal === 'MU.10-002' ? '12' : '11'}" style="text-align: center; padding: 32px; color: #64748b; font-weight: 600;">ไม่พบรายการตัวอย่างตามเงื่อนไขที่เลือก</td></tr>`;
             this.updateRunSheetSelectionCount();
             return;
         }
@@ -4854,6 +4864,7 @@ document.getElementById('formNameTitle').innerText = title;
                     <td style="padding: 8px 10px; font-weight: 500; color: #0f172a; white-space: nowrap;">${item.location_name}</td>
                     <td style="padding: 8px 8px; color: #334155; white-space: nowrap;">${item.district}</td>
                     <td style="padding: 8px 8px; color: #334155; white-space: nowrap;">${item.province}</td>
+                    <td style="padding: 8px 8px; color: #334155; white-space: nowrap;">${item.distributor || '-'}</td>
                     <td style="padding: 8px 10px; font-weight: 600; color: #0f172a; white-space: nowrap;">${item.sample_name}</td>
                     <td style="text-align: center; padding: 8px; white-space: nowrap;">
                         <span style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-family: monospace; font-size: 13px;">
@@ -4884,6 +4895,7 @@ document.getElementById('formNameTitle').innerText = title;
                     <td style="padding: 8px 10px; font-weight: 500; color: #0f172a; white-space: nowrap;">${item.location_name}</td>
                     <td style="padding: 8px 8px; color: #334155; white-space: nowrap;">${item.district}</td>
                     <td style="padding: 8px 8px; color: #334155; white-space: nowrap;">${item.province}</td>
+                    <td style="padding: 8px 8px; color: #334155; white-space: nowrap;">${item.distributor || '-'}</td>
                     <td style="padding: 8px 10px; font-weight: 600; color: #0f172a; white-space: nowrap;">${item.sample_name}</td>
                     <td style="text-align: center; padding: 8px; white-space: nowrap;">
                         <span style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-family: monospace; font-size: 13px;">
@@ -4931,6 +4943,7 @@ document.getElementById('formNameTitle').innerText = title;
                     <td style="padding: 8px 12px; font-weight: 500; color: #0f172a; white-space: nowrap;">${item.location_name}</td>
                     <td style="padding: 8px 10px; color: #334155; white-space: nowrap;">${item.district}</td>
                     <td style="padding: 8px 10px; color: #334155; white-space: nowrap;">${item.province}</td>
+                    <td style="padding: 8px 10px; color: #334155; white-space: nowrap;">${item.distributor || '-'}</td>
                     <td style="padding: 8px 12px; font-weight: 600; color: #0f172a; white-space: nowrap;">${item.sample_name}</td>
                     <td style="text-align: center; padding: 8px; white-space: nowrap;">
                         <span style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-family: monospace; font-size: 13px;">
@@ -5050,6 +5063,7 @@ document.getElementById('formNameTitle').innerText = title;
                         <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.15;">${item.location_name}</td>
                         <td style="padding: 3px 3px; font-size: 9.5pt; line-height: 1.15;">${item.district}</td>
                         <td style="padding: 3px 3px; font-size: 9.5pt; line-height: 1.15;">${item.province}</td>
+                        <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.15;">${item.distributor || '-'}</td>
                         <td style="padding: 3px 4px; font-weight: 600; font-size: 10pt; line-height: 1.15;">${item.sample_name}</td>
                         <td style="padding: 3px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt;">${item.lab_no}</td>
                         <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.2;">
@@ -5073,6 +5087,7 @@ document.getElementById('formNameTitle').innerText = title;
                         <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.15;">${item.location_name}</td>
                         <td style="padding: 3px 3px; font-size: 9.5pt; line-height: 1.15;">${item.district}</td>
                         <td style="padding: 3px 3px; font-size: 9.5pt; line-height: 1.15;">${item.province}</td>
+                        <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.15;">${item.distributor || '-'}</td>
                         <td style="padding: 3px 4px; font-weight: 600; font-size: 10pt; line-height: 1.15;">${item.sample_name}</td>
                         <td style="padding: 3px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt;">${item.lab_no}</td>
                         <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.2;">
@@ -5147,6 +5162,7 @@ document.getElementById('formNameTitle').innerText = title;
                     <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.15;">${item.location_name}</td>
                     <td style="padding: 3px 3px; font-size: 9.5pt; line-height: 1.15;">${item.district}</td>
                     <td style="padding: 3px 3px; font-size: 9.5pt; line-height: 1.15;">${item.province}</td>
+                    <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.15;">${item.distributor || '-'}</td>
                     <td style="padding: 3px 4px; font-weight: 600; font-size: 10pt; line-height: 1.15;">${item.sample_name}</td>
                     <td style="padding: 3px 2px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt;">${item.lab_no}</td>
                     <td style="padding: 3px 4px; font-size: 9.5pt; line-height: 1.2;">${item.test_name}</td>
@@ -5162,16 +5178,17 @@ document.getElementById('formNameTitle').innerText = title;
             tableHeadHtml = `
                 <thead>
                     <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 10.5pt;">
-                        <th style="width: 3.5%; text-align: center; padding: 4px 2px;">ลำดับ</th>
-                        <th style="width: 7%; text-align: center; padding: 4px 2px;">รหัสเอกสาร</th>
-                        <th style="width: 16%; text-align: left; padding: 4px 4px;">สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 7.5%; text-align: left; padding: 4px 4px;">อำเภอ</th>
-                        <th style="width: 6.5%; text-align: left; padding: 4px 4px;">จังหวัด</th>
-                        <th style="width: 14.5%; text-align: left; padding: 4px 4px;">ชื่อตัวอย่าง</th>
-                        <th style="width: 6.5%; text-align: center; padding: 4px 2px;">รหัสตัวอย่าง</th>
-                        <th style="width: 13%; text-align: left; padding: 4px 4px;">ชุดทดสอบที่ตรวจ</th>
-                        <th style="width: 14.5%; text-align: left; padding: 4px 4px;">การแปลผล</th>
-                        <th style="width: 11%; text-align: center; padding: 4px 4px;">ผลตรวจ</th>
+                        <th style="width: 3%; text-align: center; padding: 4px 2px;">ลำดับ</th>
+                        <th style="width: 6.5%; text-align: center; padding: 4px 2px;">รหัสเอกสาร</th>
+                        <th style="width: 13%; text-align: left; padding: 4px 4px;">สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 6.5%; text-align: left; padding: 4px 4px;">อำเภอ</th>
+                        <th style="width: 5.5%; text-align: left; padding: 4px 4px;">จังหวัด</th>
+                        <th style="width: 11.5%; text-align: left; padding: 4px 4px;">ผู้จำหน่าย</th>
+                        <th style="width: 13%; text-align: left; padding: 4px 4px;">ชื่อตัวอย่าง</th>
+                        <th style="width: 6%; text-align: center; padding: 4px 2px;">รหัสตัวอย่าง</th>
+                        <th style="width: 12%; text-align: left; padding: 4px 4px;">ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 13%; text-align: left; padding: 4px 4px;">การแปลผล</th>
+                        <th style="width: 10%; text-align: center; padding: 4px 4px;">ผลตรวจ</th>
                     </tr>
                 </thead>
             `;
@@ -5179,15 +5196,16 @@ document.getElementById('formNameTitle').innerText = title;
             tableHeadHtml = `
                 <thead>
                     <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 10.5pt;">
-                        <th style="width: 3.5%; text-align: center; padding: 4px 2px;">ลำดับ</th>
-                        <th style="width: 7.5%; text-align: center; padding: 4px 2px;">รหัสเอกสาร</th>
-                        <th style="width: 18%; text-align: left; padding: 4px 4px;">สถานที่เก็บตัวอย่าง</th>
-                        <th style="width: 8%; text-align: left; padding: 4px 4px;">อำเภอ</th>
-                        <th style="width: 7%; text-align: left; padding: 4px 4px;">จังหวัด</th>
-                        <th style="width: 16%; text-align: left; padding: 4px 4px;">ชื่อตัวอย่าง</th>
-                        <th style="width: 7%; text-align: center; padding: 4px 2px;">รหัสตัวอย่าง</th>
-                        <th style="width: 15%; text-align: left; padding: 4px 4px;">ชุดทดสอบที่ตรวจ</th>
-                        <th style="width: 18%; text-align: center; padding: 4px 4px;">ผลตรวจ</th>
+                        <th style="width: 3%; text-align: center; padding: 4px 2px;">ลำดับ</th>
+                        <th style="width: 7%; text-align: center; padding: 4px 2px;">รหัสเอกสาร</th>
+                        <th style="width: 15%; text-align: left; padding: 4px 4px;">สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 7%; text-align: left; padding: 4px 4px;">อำเภอ</th>
+                        <th style="width: 6%; text-align: left; padding: 4px 4px;">จังหวัด</th>
+                        <th style="width: 13%; text-align: left; padding: 4px 4px;">ผู้จำหน่าย</th>
+                        <th style="width: 15%; text-align: left; padding: 4px 4px;">ชื่อตัวอย่าง</th>
+                        <th style="width: 6.5%; text-align: center; padding: 4px 2px;">รหัสตัวอย่าง</th>
+                        <th style="width: 13.5%; text-align: left; padding: 4px 4px;">ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 14%; text-align: center; padding: 4px 4px;">ผลตรวจ</th>
                     </tr>
                 </thead>
             `;
