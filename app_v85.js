@@ -4583,6 +4583,385 @@ document.getElementById('formNameTitle').innerText = title;
         }
     },
 
+    // Lab Bench Run Sheet Logic (ใบบันทึกผลการตรวจวิเคราะห์หน้าแลป 9 คอลัมน์)
+    openLabRunSheetModal(defaultForm = 'MU.10-001') {
+        const modal = document.getElementById('labRunSheetModal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        
+        const formSelect = document.getElementById('runSheetFilterForm');
+        if (formSelect) {
+            formSelect.value = defaultForm;
+        }
+        const provSelect = document.getElementById('runSheetFilterProvince');
+        if (provSelect) {
+            provSelect.value = 'ALL';
+        }
+        const searchInput = document.getElementById('runSheetSearch');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        this.runSheetCheckedMap = {};
+        this.filterRunSheetTable();
+    },
+
+    closeLabRunSheetModal() {
+        const modal = document.getElementById('labRunSheetModal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    getRunSheetAllItems() {
+        const samplesList = (typeof this.getVisibleSamples === 'function' ? this.getVisibleSamples() : this.samples) || [];
+        const activeSamples = samplesList.filter(s => ['accepted', 'summarized', 'registered'].includes(s.status));
+        
+        const allItems = [];
+        activeSamples.forEach(s => {
+            const subItems = this.getSampleItemsList(s);
+            const formType = s.form_type || 'MU.10-001';
+            const locationName = s.location_name || s.market_name || s.place_name || '-';
+            let district = s.district || s.amphoe || s.amphur || '';
+            if (!district && s.location_address && s.location_address.includes('อ.')) {
+                district = s.location_address.split('อ.')[1].split(' ')[0].trim();
+            }
+            if (!district) district = '-';
+            const province = s.province || '-';
+            
+            // Format-specific default test names
+            let defaultTest = '-';
+            if (formType === 'MU.10-001') defaultTest = 'บอแรกซ์/ฟอร์มาลิน/ฟอกขาว/ซาลิซิลิค/เนื้อแดง';
+            else if (formType === 'MU.10-002') defaultTest = 'สารโพลาร์ในน้ำมันทอดซ้ำ';
+            else if (formType === 'MU.10-003') defaultTest = 'ปริมาณสารไอโอดีน (Iodate)';
+            else if (formType === 'MU.10-004') defaultTest = 'สารโพลาร์ (ติดตามผล 7 ครั้ง)';
+            else if (formType === 'MU.10-005') defaultTest = 'ชุดทดสอบโคลิฟอร์ม (อ11/อ12/อ13)';
+            else if (formType === 'MU.10-006') defaultTest = 'จุลชีววิทยา';
+
+            subItems.forEach((it, idx) => {
+                const itemLabNo = this.getItemLabNo(s, it.idx || (idx + 1));
+                let itemTest = it.test_type || it.tests || s.test_types || s.tests || s.analysis_substance || defaultTest;
+                if (Array.isArray(itemTest)) itemTest = itemTest.join(', ');
+
+                allItems.push({
+                    uniqueId: `${s.ref_id}_${it.idx || (idx + 1)}`,
+                    ref_id: s.ref_id,
+                    form_type: formType,
+                    location_name: locationName,
+                    district: district,
+                    province: province,
+                    sample_name: it.name || s.sample_name || `ตัวอย่างที่ ${idx + 1}`,
+                    lab_no: itemLabNo,
+                    test_name: itemTest,
+                    sample_status: s.status,
+                    created_at: s.created_at,
+                    rawSample: s
+                });
+            });
+        });
+        
+        return allItems;
+    },
+
+    filterRunSheetTable() {
+        const tbody = document.getElementById('runSheetTableBody');
+        if (!tbody) return;
+
+        const formVal = document.getElementById('runSheetFilterForm') ? document.getElementById('runSheetFilterForm').value : 'ALL';
+        const provVal = document.getElementById('runSheetFilterProvince') ? document.getElementById('runSheetFilterProvince').value : 'ALL';
+        const searchVal = document.getElementById('runSheetSearch') ? document.getElementById('runSheetSearch').value.toLowerCase().trim() : '';
+
+        const allItems = this.getRunSheetAllItems();
+        const filtered = allItems.filter(item => {
+            if (formVal !== 'ALL' && item.form_type !== formVal) return false;
+            if (provVal !== 'ALL' && !item.province.includes(provVal)) return false;
+            if (searchVal) {
+                const combined = `${item.lab_no} ${item.sample_name} ${item.location_name} ${item.district} ${item.province} ${item.test_name} ${item.form_type}`.toLowerCase();
+                if (!combined.includes(searchVal)) return false;
+            }
+            return true;
+        });
+
+        this.currentRunSheetFilteredItems = filtered;
+
+        if (!this.runSheetCheckedMap) this.runSheetCheckedMap = {};
+        filtered.forEach(it => {
+            if (this.runSheetCheckedMap[it.uniqueId] === undefined) {
+                this.runSheetCheckedMap[it.uniqueId] = true;
+            }
+        });
+
+        tbody.innerHTML = '';
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 32px; color: #64748b; font-weight: 600;">ไม่พบรายการตัวอย่างตามเงื่อนไขที่เลือก</td></tr>';
+            this.updateRunSheetSelectionCount();
+            return;
+        }
+
+        filtered.forEach((item, index) => {
+            const isChecked = this.runSheetCheckedMap[item.uniqueId] !== false;
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #e2e8f0';
+            if (index % 2 === 1) tr.style.background = '#f8fafc';
+
+            let resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ผ่าน &nbsp; [ ] ตก</span>';
+            if (item.form_type === 'MU.10-002' || item.form_type === 'MU.10-004') {
+                resultDisplay = '<div style="font-size:11.5px; line-height:1.3;"><span style="color:#64748b;">ค่าโพลาร์:</span> ____ %<br><strong style="color:#0284c7;">[ ] ≤25% &nbsp; [ ] >25%</strong></div>';
+            } else if (item.form_type === 'MU.10-003') {
+                resultDisplay = '<div style="font-size:11.5px; line-height:1.3;"><span style="color:#64748b;">ไอโอดีน:</span> ____ ppm<br><strong style="color:#0284c7;">[ ] ผ่าน &nbsp; [ ] ตก</strong></div>';
+            } else if (item.form_type === 'MU.10-005') {
+                resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ปลอดภัย &nbsp; [ ] ไม่ปลอดภัย</span>';
+            }
+
+            tr.innerHTML = `
+                <td style="text-align: center; padding: 8px;">
+                    <input type="checkbox" class="run-sheet-item-check" data-id="${item.uniqueId}" ${isChecked ? 'checked' : ''} onchange="app.toggleRunSheetItemCheck('${item.uniqueId}', this.checked)">
+                </td>
+                <td style="text-align: center; font-weight: 700; color: #64748b; padding: 8px;">${index + 1}</td>
+                <td style="text-align: center; padding: 8px;">
+                    <span style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 11.5px; font-family: monospace;">
+                        ${item.form_type}
+                    </span>
+                </td>
+                <td style="padding: 8px 12px; font-weight: 500; color: #0f172a;">${item.location_name}</td>
+                <td style="padding: 8px 10px; color: #334155;">${item.district}</td>
+                <td style="padding: 8px 10px; color: #334155;">${item.province}</td>
+                <td style="padding: 8px 12px; font-weight: 600; color: #0f172a;">${item.sample_name}</td>
+                <td style="text-align: center; padding: 8px;">
+                    <span style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-family: monospace; font-size: 13px;">
+                        ${item.lab_no}
+                    </span>
+                </td>
+                <td style="padding: 8px 10px; font-size: 12px; color: #475569;">${item.test_name}</td>
+                <td style="text-align: center; padding: 8px; background: #fafafa;">
+                    ${resultDisplay}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        this.updateRunSheetSelectionCount();
+    },
+
+    toggleRunSheetItemCheck(uniqueId, checked) {
+        if (!this.runSheetCheckedMap) this.runSheetCheckedMap = {};
+        this.runSheetCheckedMap[uniqueId] = checked;
+        this.updateRunSheetSelectionCount();
+    },
+
+    toggleRunSheetSelectAll(checked) {
+        if (!this.currentRunSheetFilteredItems) return;
+        if (!this.runSheetCheckedMap) this.runSheetCheckedMap = {};
+        this.currentRunSheetFilteredItems.forEach(it => {
+            this.runSheetCheckedMap[it.uniqueId] = checked;
+        });
+        const masterCheck = document.getElementById('runSheetMasterCheck');
+        if (masterCheck) masterCheck.checked = checked;
+        
+        const checkboxes = document.querySelectorAll('.run-sheet-item-check');
+        checkboxes.forEach(cb => { cb.checked = checked; });
+        
+        this.updateRunSheetSelectionCount();
+    },
+
+    updateRunSheetSelectionCount() {
+        const filtered = this.currentRunSheetFilteredItems || [];
+        const checkedCount = filtered.filter(it => this.runSheetCheckedMap && this.runSheetCheckedMap[it.uniqueId] !== false).length;
+        const badge = document.getElementById('runSheetCountBadge');
+        if (badge) {
+            badge.innerText = `เลือก: ${checkedCount} / ${filtered.length} รายการ`;
+        }
+    },
+
+    printLabRunSheet() {
+        const filtered = this.currentRunSheetFilteredItems || [];
+        const selectedItems = filtered.filter(it => this.runSheetCheckedMap && this.runSheetCheckedMap[it.uniqueId] !== false);
+        
+        if (selectedItems.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'กรุณาเลือกรายการตัวอย่าง',
+                text: 'ยังไม่ได้เลือกรายการตัวอย่างสำหรับพิมพ์ใบบันทึกผลหน้าแลป'
+            });
+            return;
+        }
+
+        const formVal = document.getElementById('runSheetFilterForm') ? document.getElementById('runSheetFilterForm').value : 'ALL';
+        const provVal = document.getElementById('runSheetFilterProvince') ? document.getElementById('runSheetFilterProvince').value : 'ALL';
+        
+        let formLabel = formVal === 'ALL' ? 'ทุกประเภทแบบฟอร์ม' : formVal;
+        if (formVal === 'MU.10-001') formLabel = 'MU.10-001 (สารเคมีปนเปื้อน 5 ชนิด)';
+        else if (formVal === 'MU.10-002') formLabel = 'MU.10-002 (สารโพลาร์ในน้ำมันทอดซ้ำ)';
+        else if (formVal === 'MU.10-003') formLabel = 'MU.10-003 (ไอโอดีนในเกลือบริโภค)';
+        else if (formVal === 'MU.10-004') formLabel = 'MU.10-004 (น้ำมันทอดซ้ำ ติดตาม 7 ครั้ง)';
+        else if (formVal === 'MU.10-005') formLabel = 'MU.10-005 (ชุดทดสอบโคลิฟอร์ม อ11-อ13)';
+        else if (formVal === 'MU.10-006') formLabel = 'MU.10-006 (จุลชีววิทยา)';
+
+        const provLabel = provVal === 'ALL' ? 'ทุกจังหวัด (เขตสุขภาพที่ 10)' : `จังหวัด${provVal}`;
+        const printDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        const rowsHtml = selectedItems.map((item, idx) => {
+            let resultCell = `
+                <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 11pt;">
+                    <span>[ &nbsp; ] ผ่าน</span>
+                    <span>[ &nbsp; ] ตก</span>
+                </div>
+            `;
+            if (item.form_type === 'MU.10-002' || item.form_type === 'MU.10-004') {
+                resultCell = `
+                    <div style="font-size: 10.5pt; text-align: left; padding-left: 2px;">
+                        <span>ค่าโพลาร์: .......... %</span><br>
+                        <span>[ &nbsp; ] ≤25% (ผ่าน) &nbsp; [ &nbsp; ] >25% (ตก)</span>
+                    </div>
+                `;
+            } else if (item.form_type === 'MU.10-003') {
+                resultCell = `
+                    <div style="font-size: 10.5pt; text-align: left; padding-left: 2px;">
+                        <span>ไอโอดีน: .......... ppm</span><br>
+                        <span>[ &nbsp; ] 20-40 (ผ่าน) &nbsp; [ &nbsp; ] ตก</span>
+                    </div>
+                `;
+            } else if (item.form_type === 'MU.10-005') {
+                resultCell = `
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10.5pt;">
+                        <span>[ &nbsp; ] ปลอดภัย</span>
+                        <span>[ &nbsp; ] ไม่ปลอดภัย</span>
+                    </div>
+                `;
+            }
+
+            return `
+                <tr style="page-break-inside: avoid; border-bottom: 1px solid #333;">
+                    <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-weight: bold; font-size: 11pt;">${idx + 1}</td>
+                    <td style="border: 1px solid #333; padding: 5px 4px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt;">${item.form_type}</td>
+                    <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; line-height: 1.2;">${item.location_name}</td>
+                    <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt;">${item.district}</td>
+                    <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt;">${item.province}</td>
+                    <td style="border: 1px solid #333; padding: 5px 6px; font-weight: 600; font-size: 11pt; line-height: 1.2;">${item.sample_name}</td>
+                    <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-family: monospace; font-weight: bold; font-size: 12pt;">${item.lab_no}</td>
+                    <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10.5pt; line-height: 1.2;">${item.test_name}</td>
+                    <td style="border: 1px solid #333; padding: 5px 4px; text-align: center; background: #fff;">
+                        ${resultCell}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        const htmlContent = `
+            <div style="font-family: 'TH SarabunPSK', 'TH Sarabun New', 'Sarabun', sans-serif; padding: 6mm 6mm; color: #000; box-sizing: border-box;">
+                <!-- Header -->
+                <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 18pt; font-weight: bold; line-height: 1.2;">
+                        ใบบันทึกผลการตรวจวิเคราะห์ทางห้องปฏิบัติการ (Lab Bench Run Sheet)
+                    </div>
+                    <div style="font-size: 14pt; font-weight: 600; margin-top: 2px;">
+                        หน่วยเคลื่อนที่เพื่อความปลอดภัยด้านอาหาร เขตสุขภาพที่ 10 (Mobile Unit 10)
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12.5pt; padding: 0 4px;">
+                        <div><strong>รหัสเอกสาร:</strong> ${formLabel}</div>
+                        <div><strong>พื้นที่:</strong> ${provLabel}</div>
+                        <div><strong>จำนวนตัวอย่าง:</strong> ${selectedItems.length} ตัวอย่าง</div>
+                        <div><strong>วันที่พิมพ์:</strong> ${printDate}</div>
+                    </div>
+                </div>
+
+                <!-- 9-Column Table -->
+                <table style="width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-top: 6px;">
+                    <thead>
+                        <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 11.5pt;">
+                            <th style="border: 1px solid #000; padding: 6px 3px; width: 35px; text-align: center;">1. ลำดับ</th>
+                            <th style="border: 1px solid #000; padding: 6px 4px; width: 75px; text-align: center;">2. รหัสเอกสาร</th>
+                            <th style="border: 1px solid #000; padding: 6px 6px; text-align: left;">3. สถานที่เก็บตัวอย่าง</th>
+                            <th style="border: 1px solid #000; padding: 6px 6px; width: 90px; text-align: left;">4. อำเภอ</th>
+                            <th style="border: 1px solid #000; padding: 6px 6px; width: 85px; text-align: left;">5. จังหวัด</th>
+                            <th style="border: 1px solid #000; padding: 6px 6px; text-align: left;">6. ชื่อตัวอย่าง</th>
+                            <th style="border: 1px solid #000; padding: 6px 4px; width: 70px; text-align: center;">7. รหัสตัวอย่าง</th>
+                            <th style="border: 1px solid #000; padding: 6px 6px; width: 130px; text-align: left;">8. ชุดทดสอบที่ตรวจ</th>
+                            <th style="border: 1px solid #000; padding: 6px 6px; width: 140px; text-align: center;">9. ผลตรวจ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+
+                <!-- Signatures Footer -->
+                <div style="margin-top: 25px; display: flex; justify-content: space-around; page-break-inside: avoid; font-size: 12.5pt;">
+                    <div style="text-align: center; width: 42%;">
+                        <div>ลงชื่อ ................................................................ ผู้ตรวจวิเคราะห์</div>
+                        <div style="margin-top: 4px;">( ................................................................ )</div>
+                        <div style="margin-top: 4px;">ตำแหน่ง ................................................................</div>
+                        <div style="margin-top: 4px;">วันที่ ......... / ......... / .............</div>
+                    </div>
+                    <div style="text-align: center; width: 42%;">
+                        <div>ลงชื่อ ................................................................ ผู้ตรวจสอบความถูกต้อง</div>
+                        <div style="margin-top: 4px;">( ภญ.ฐิติพร อินศร )</div>
+                        <div style="margin-top: 4px;">ตำแหน่ง เภสัชกรชำนาญการพิเศษ</div>
+                        <div style="margin-top: 4px;">วันที่ ......... / ......... / .............</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        this.printHtmlInFrame(htmlContent, 'Lab_Bench_Run_Sheet_' + formVal);
+    },
+
+    printHtmlInFrame(htmlContent, title) {
+        let iframe = document.getElementById('submissionPdfPrintFrame');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'submissionPdfPrintFrame';
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            iframe.style.opacity = '0';
+            iframe.style.pointerEvents = 'none';
+            iframe.style.zIndex = '-1';
+            document.body.appendChild(iframe);
+        }
+
+        try {
+            const doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write('<html><head><base href="' + window.location.href + '"><title>' + title + '</title><link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="style_v3.css">' + this.getStandardPdfStyles('landscape') + '</head><body>');
+            doc.write(htmlContent);
+            doc.write('</body></html>');
+            doc.close();
+
+            const originalTitle = document.title;
+            document.title = title;
+
+            const restoreMainWindow = () => {
+                document.title = originalTitle;
+                if (typeof document !== 'undefined' && document.body && document.body.classList) {
+                    document.body.classList.remove('is-printing-pdf', 'swal2-shown', 'swal2-height-auto');
+                }
+                if (typeof window !== 'undefined' && typeof window.focus === 'function') {
+                    window.focus();
+                }
+            };
+
+            iframe.contentWindow.onafterprint = () => {
+                setTimeout(restoreMainWindow, 100);
+            };
+
+            setTimeout(() => {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch (ePrint) {
+                    console.error('print error:', ePrint);
+                } finally {
+                    setTimeout(restoreMainWindow, 500);
+                }
+            }, 150);
+        } catch (e) {
+            console.error('print error:', e);
+            window.print();
+        }
+    },
+
     openAnalysisInputModal(refId) {
         const sample = this.samples.find(s => s.ref_id === refId);
         if(!sample) return;
