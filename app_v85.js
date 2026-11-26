@@ -4627,14 +4627,25 @@ document.getElementById('formNameTitle').innerText = title;
             if (!district) district = '-';
             const province = s.province || '-';
             
-            // Format-specific default test names
+            // Format-specific default test names (ตรงตามระบบจริง MU.10-001 ถึง MU.10-008)
             let defaultTest = '-';
-            if (formType === 'MU.10-001') defaultTest = 'บอแรกซ์/ฟอร์มาลิน/ฟอกขาว/ซาลิซิลิค/เนื้อแดง';
-            else if (formType === 'MU.10-002') defaultTest = 'สารโพลาร์ในน้ำมันทอดซ้ำ';
-            else if (formType === 'MU.10-003') defaultTest = 'ปริมาณสารไอโอดีน (Iodate)';
-            else if (formType === 'MU.10-004') defaultTest = 'สารโพลาร์ (ติดตามผล 7 ครั้ง)';
-            else if (formType === 'MU.10-005') defaultTest = 'ชุดทดสอบโคลิฟอร์ม (อ11/อ12/อ13)';
-            else if (formType === 'MU.10-006') defaultTest = 'จุลชีววิทยา';
+            if (formType === 'MU.10-001') {
+                defaultTest = s.pesticide_test_type || s.test_kit_type || 'สารเคมีกำจัดแมลง (GT kit / TM/2 kit)';
+            } else if (formType === 'MU.10-002') {
+                defaultTest = 'สารปนเปื้อน 5 ชนิด (บอแรกซ์/ฟอร์มาลิน/ฟอกขาว/กันรา/เร่งเนื้อแดง)';
+            } else if (formType === 'MU.10-003') {
+                defaultTest = 'สารโพลาร์ในน้ำมันทอดซ้ำ (เครื่องวัด Ebro/Testo)';
+            } else if (formType === 'MU.10-004') {
+                defaultTest = 'สารโพลาร์ในน้ำมันทอดซ้ำ (ชุดทดสอบ Test Kit)';
+            } else if (formType === 'MU.10-005') {
+                defaultTest = 'ปริมาณสารไอโอดีนในเกลือบริโภค (I-Kit/ไตรเตรท)';
+            } else if (formType === 'MU.10-006') {
+                defaultTest = 'คุณภาพน้ำดื่ม / โคลิฟอร์มในน้ำ (อ11)';
+            } else if (formType === 'MU.10-007') {
+                defaultTest = 'เชื้อโคลิฟอร์มขั้นต้น (SI-2 ในอาหาร/ภาชนะ)';
+            } else if (formType === 'MU.10-008') {
+                defaultTest = 'ตรวจสอบความถูกต้องของฉลากอาหาร';
+            }
 
             subItems.forEach((it, idx) => {
                 const itemLabNo = this.getItemLabNo(s, it.idx || (idx + 1));
@@ -4703,12 +4714,20 @@ document.getElementById('formNameTitle').innerText = title;
             if (index % 2 === 1) tr.style.background = '#f8fafc';
 
             let resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ผ่าน &nbsp; [ ] ตก</span>';
-            if (item.form_type === 'MU.10-002' || item.form_type === 'MU.10-004') {
-                resultDisplay = '<div style="font-size:11.5px; line-height:1.3;"><span style="color:#64748b;">ค่าโพลาร์:</span> ____ %<br><strong style="color:#0284c7;">[ ] ≤25% &nbsp; [ ] >25%</strong></div>';
+            if (item.form_type === 'MU.10-001') {
+                resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:11.5px;">[ ] ปลอดภัย &nbsp; [ ] ปลอดภัย(มีพิษน้อย) &nbsp; [ ] ไม่ปลอดภัย</span>';
+            } else if (item.form_type === 'MU.10-002') {
+                resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ไม่พบสาร (ผ่าน) &nbsp; [ ] พบสาร (ตก)</span>';
             } else if (item.form_type === 'MU.10-003') {
-                resultDisplay = '<div style="font-size:11.5px; line-height:1.3;"><span style="color:#64748b;">ไอโอดีน:</span> ____ ppm<br><strong style="color:#0284c7;">[ ] ผ่าน &nbsp; [ ] ตก</strong></div>';
+                resultDisplay = '<div style="font-size:11.5px; line-height:1.3;"><span style="color:#64748b;">ค่าโพลาร์:</span> ____ %<br><strong style="color:#0284c7;">[ ] ≤25% (ผ่าน) &nbsp; [ ] >25% (ตก)</strong></div>';
+            } else if (item.form_type === 'MU.10-004') {
+                resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ผ่าน (≤25%) &nbsp; [ ] ไม่ผ่าน (>25%)</span>';
             } else if (item.form_type === 'MU.10-005') {
-                resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ปลอดภัย &nbsp; [ ] ไม่ปลอดภัย</span>';
+                resultDisplay = '<div style="font-size:11.5px; line-height:1.3;"><span style="color:#64748b;">ไอโอดีน:</span> ____ ppm<br><strong style="color:#0284c7;">[ ] 20-40 ppm (ผ่าน) &nbsp; [ ] ตก</strong></div>';
+            } else if (item.form_type === 'MU.10-006' || item.form_type === 'MU.10-007') {
+                resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ปลอดภัย (ไม่พบเชื้อ) &nbsp; [ ] ไม่ปลอดภัย</span>';
+            } else if (item.form_type === 'MU.10-008') {
+                resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ถูกต้อง (ผ่าน) &nbsp; [ ] ไม่ถูกต้อง</span>';
             }
 
             tr.innerHTML = `
@@ -4787,13 +4806,15 @@ document.getElementById('formNameTitle').innerText = title;
         const formVal = document.getElementById('runSheetFilterForm') ? document.getElementById('runSheetFilterForm').value : 'ALL';
         const provVal = document.getElementById('runSheetFilterProvince') ? document.getElementById('runSheetFilterProvince').value : 'ALL';
         
-        let formLabel = formVal === 'ALL' ? 'ทุกประเภทแบบฟอร์ม' : formVal;
-        if (formVal === 'MU.10-001') formLabel = 'MU.10-001 (สารเคมีปนเปื้อน 5 ชนิด)';
-        else if (formVal === 'MU.10-002') formLabel = 'MU.10-002 (สารโพลาร์ในน้ำมันทอดซ้ำ)';
-        else if (formVal === 'MU.10-003') formLabel = 'MU.10-003 (ไอโอดีนในเกลือบริโภค)';
-        else if (formVal === 'MU.10-004') formLabel = 'MU.10-004 (น้ำมันทอดซ้ำ ติดตาม 7 ครั้ง)';
-        else if (formVal === 'MU.10-005') formLabel = 'MU.10-005 (ชุดทดสอบโคลิฟอร์ม อ11-อ13)';
-        else if (formVal === 'MU.10-006') formLabel = 'MU.10-006 (จุลชีววิทยา)';
+        let formLabel = formVal === 'ALL' ? 'ทุกประเภทแบบฟอร์ม (MU.10-001 – MU.10-008)' : formVal;
+        if (formVal === 'MU.10-001') formLabel = 'MU.10-001: ผักและผลไม้ (สารเคมีกำจัดแมลง GT/TM2 kit)';
+        else if (formVal === 'MU.10-002') formLabel = 'MU.10-002: สารปนเปื้อน 5 ชนิด (บอแรกซ์/ฟอร์มาลิน/ฟอกขาว/กันรา/เร่งเนื้อแดง)';
+        else if (formVal === 'MU.10-003') formLabel = 'MU.10-003: น้ำมันทอดซ้ำ (เครื่องตรวจวัด Ebro/Testo)';
+        else if (formVal === 'MU.10-004') formLabel = 'MU.10-004: น้ำมันทอดซ้ำ (ชุดทดสอบ Test Kit)';
+        else if (formVal === 'MU.10-005') formLabel = 'MU.10-005: เกลือบริโภค (ปริมาณสารไอโอดีน)';
+        else if (formVal === 'MU.10-006') formLabel = 'MU.10-006: น้ำบริโภค (คุณภาพน้ำดื่มและโคลิฟอร์ม อ11)';
+        else if (formVal === 'MU.10-007') formLabel = 'MU.10-007: เชื้อโคลิฟอร์มขั้นต้น (SI-2 ในอาหาร/ภาชนะ)';
+        else if (formVal === 'MU.10-008') formLabel = 'MU.10-008: ตรวจฉลากอาหาร';
 
         const provLabel = provVal === 'ALL' ? 'ทุกจังหวัด (เขตสุขภาพที่ 10)' : `จังหวัด${provVal}`;
         const printDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -4805,25 +4826,54 @@ document.getElementById('formNameTitle').innerText = title;
                     <span>[ &nbsp; ] ตก</span>
                 </div>
             `;
-            if (item.form_type === 'MU.10-002' || item.form_type === 'MU.10-004') {
+            if (item.form_type === 'MU.10-001') {
                 resultCell = `
-                    <div style="font-size: 10.5pt; text-align: left; padding-left: 2px;">
-                        <span>ค่าโพลาร์: .......... %</span><br>
-                        <span>[ &nbsp; ] ≤25% (ผ่าน) &nbsp; [ &nbsp; ] >25% (ตก)</span>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 9.5pt;">
+                        <span>[ &nbsp; ] ปลอดภัย</span>
+                        <span>[ &nbsp; ] มีพิษน้อย</span>
+                        <span>[ &nbsp; ] ไม่ปลอดภัย</span>
+                    </div>
+                `;
+            } else if (item.form_type === 'MU.10-002') {
+                resultCell = `
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10.5pt;">
+                        <span>[ &nbsp; ] ไม่พบ (ผ่าน)</span>
+                        <span>[ &nbsp; ] พบสาร (ตก)</span>
                     </div>
                 `;
             } else if (item.form_type === 'MU.10-003') {
                 resultCell = `
-                    <div style="font-size: 10.5pt; text-align: left; padding-left: 2px;">
-                        <span>ไอโอดีน: .......... ppm</span><br>
-                        <span>[ &nbsp; ] 20-40 (ผ่าน) &nbsp; [ &nbsp; ] ตก</span>
+                    <div style="font-size: 10pt; text-align: left; padding-left: 2px;">
+                        <span>ค่าโพลาร์: .......... %</span><br>
+                        <span>[ &nbsp; ] ≤25% (ผ่าน) &nbsp; [ &nbsp; ] >25% (ตก)</span>
+                    </div>
+                `;
+            } else if (item.form_type === 'MU.10-004') {
+                resultCell = `
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10pt;">
+                        <span>[ &nbsp; ] ผ่าน (≤25%)</span>
+                        <span>[ &nbsp; ] ไม่ผ่าน (>25%)</span>
                     </div>
                 `;
             } else if (item.form_type === 'MU.10-005') {
                 resultCell = `
-                    <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10.5pt;">
-                        <span>[ &nbsp; ] ปลอดภัย</span>
+                    <div style="font-size: 10pt; text-align: left; padding-left: 2px;">
+                        <span>ไอโอดีน: .......... ppm</span><br>
+                        <span>[ &nbsp; ] 20-40 (ผ่าน) &nbsp; [ &nbsp; ] ตกเกณฑ์</span>
+                    </div>
+                `;
+            } else if (item.form_type === 'MU.10-006' || item.form_type === 'MU.10-007') {
+                resultCell = `
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 10pt;">
+                        <span>[ &nbsp; ] ปลอดภัย (ไม่พบเชื้อ)</span>
                         <span>[ &nbsp; ] ไม่ปลอดภัย</span>
+                    </div>
+                `;
+            } else if (item.form_type === 'MU.10-008') {
+                resultCell = `
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10.5pt;">
+                        <span>[ &nbsp; ] ถูกต้อง (ผ่าน)</span>
+                        <span>[ &nbsp; ] ไม่ถูกต้อง</span>
                     </div>
                 `;
             }
