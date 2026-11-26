@@ -453,20 +453,40 @@ const app = {
                 const view = e.currentTarget.getAttribute('data-view');
                 this.switchView(view);
                 
-                // On mobile, close sidebar after clicking
-                if (window.innerWidth <= 768) {
-                    document.getElementById('sidebar').classList.remove('active');
+                // On mobile/tablet, close sidebar after clicking
+                if (window.innerWidth <= 1024) {
+                    const sidebarEl = document.getElementById('sidebar');
+                    const overlayEl = document.getElementById('sidebarOverlay');
+                    if (sidebarEl) sidebarEl.classList.remove('active');
+                    if (overlayEl) overlayEl.classList.remove('active');
                 }
             });
         });
 
-        // Mobile sidebar toggle
-        document.getElementById('openSidebar').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.add('active');
-        });
-        document.getElementById('closeSidebar').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.remove('active');
-        });
+        // Mobile/Tablet sidebar toggle
+        const sidebarEl = document.getElementById('sidebar');
+        const openBtn = document.getElementById('openSidebar');
+        const closeBtn = document.getElementById('closeSidebar');
+        const overlayEl = document.getElementById('sidebarOverlay');
+
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                if (sidebarEl) sidebarEl.classList.add('active');
+                if (overlayEl) overlayEl.classList.add('active');
+            });
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                if (sidebarEl) sidebarEl.classList.remove('active');
+                if (overlayEl) overlayEl.classList.remove('active');
+            });
+        }
+        if (overlayEl) {
+            overlayEl.addEventListener('click', () => {
+                if (sidebarEl) sidebarEl.classList.remove('active');
+                overlayEl.classList.remove('active');
+            });
+        }
 
         // Auth forms
         document.getElementById('loginForm').addEventListener('submit', this.handleLogin.bind(this));
