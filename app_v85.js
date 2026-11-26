@@ -4586,7 +4586,11 @@ document.getElementById('formNameTitle').innerText = title;
     // Lab Bench Run Sheet Logic (ใบบันทึกผลการตรวจวิเคราะห์หน้าแลป 9 คอลัมน์)
     openLabRunSheetModal(defaultForm = 'MU.10-001') {
         const modal = document.getElementById('labRunSheetModal');
-        if (!modal) return;
+        if (!modal) {
+            console.error('labRunSheetModal element not found');
+            return;
+        }
+        modal.classList.add('active');
         modal.style.display = 'flex';
         
         const formSelect = document.getElementById('runSheetFilterForm');
@@ -4603,12 +4607,19 @@ document.getElementById('formNameTitle').innerText = title;
         }
         
         this.runSheetCheckedMap = {};
-        this.filterRunSheetTable();
+        try {
+            this.filterRunSheetTable();
+        } catch (err) {
+            console.error('filterRunSheetTable error:', err);
+        }
     },
 
     closeLabRunSheetModal() {
         const modal = document.getElementById('labRunSheetModal');
-        if (modal) modal.style.display = 'none';
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+        }
     },
 
     getRunSheetAllItems() {
@@ -4769,9 +4780,9 @@ document.getElementById('formNameTitle').innerText = title;
         const allItems = this.getRunSheetAllItems();
         const filtered = allItems.filter(item => {
             if (formVal !== 'ALL' && item.form_type !== formVal) return false;
-            if (provVal !== 'ALL' && !item.province.includes(provVal)) return false;
+            if (provVal !== 'ALL' && !(item.province || '').includes(provVal)) return false;
             if (searchVal) {
-                const combined = `${item.lab_no} ${item.sample_name} ${item.location_name} ${item.district} ${item.province} ${item.test_name} ${item.form_type}`.toLowerCase();
+                const combined = `${item.lab_no || ''} ${item.sample_name || ''} ${item.location_name || ''} ${item.district || ''} ${item.province || ''} ${item.test_name || ''} ${item.form_type || ''}`.toLowerCase();
                 if (!combined.includes(searchVal)) return false;
             }
             return true;
@@ -14291,6 +14302,9 @@ const btnApprove = document.getElementById('btnApproveAndSign');
 
 };
 window.app = app;
+window.openLabRunSheetModal = function(f) { return app.openLabRunSheetModal(f); };
+window.closeLabRunSheetModal = function() { return app.closeLabRunSheetModal(); };
+window.printLabRunSheet = function() { return app.printLabRunSheet(); };
 
 // Start the app when DOM loads
 document.addEventListener('DOMContentLoaded', () => {
