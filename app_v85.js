@@ -4648,13 +4648,44 @@ document.getElementById('formNameTitle').innerText = title;
             }
 
             subItems.forEach((it, idx) => {
-                const itemLabNo = this.getItemLabNo(s, it.idx || (idx + 1));
-                let itemTest = it.test_type || it.tests || s.test_types || s.tests || s.analysis_substance || defaultTest;
+                const itemIdx = it.idx || (idx + 1);
+                const itemLabNo = this.getItemLabNo(s, itemIdx);
+
+                let mu2Tests = [];
+                if (formType === 'MU.10-002') {
+                    if (s[`test_borax_${itemIdx}`] || (itemIdx === 1 && s.test_borax)) mu2Tests.push('borax');
+                    if (s[`test_formalin_${itemIdx}`] || (itemIdx === 1 && s.test_formalin)) mu2Tests.push('formalin');
+                    if (s[`test_bleach_${itemIdx}`] || (itemIdx === 1 && s.test_bleach)) mu2Tests.push('bleach');
+                    if (s[`test_salicylic_${itemIdx}`] || (itemIdx === 1 && s.test_salicylic)) mu2Tests.push('salicylic');
+                    if (s[`test_agonist_${itemIdx}`] || (itemIdx === 1 && s.test_agonist)) mu2Tests.push('agonist');
+
+                    if (mu2Tests.length === 0) {
+                        const rawT = (it.test_type || it.tests || s.test_types || s.tests || s.analysis_substance || '').toString();
+                        if (rawT.includes('บอแรกซ์')) mu2Tests.push('borax');
+                        if (rawT.includes('ฟอร์มาลิน')) mu2Tests.push('formalin');
+                        if (rawT.includes('ฟอกขาว')) mu2Tests.push('bleach');
+                        if (rawT.includes('กันรา') || rawT.includes('ซาลิซิลิค')) mu2Tests.push('salicylic');
+                        if (rawT.includes('เร่งเนื้อแดง') || rawT.includes('ซาลบูทามอล')) mu2Tests.push('agonist');
+                    }
+                    if (mu2Tests.length === 0) {
+                        mu2Tests.push('borax');
+                    }
+                }
+
+                let itemTest = it.test_type || it.tests || s.test_types || s.tests || s.analysis_substance;
+                if (!itemTest) {
+                    if (formType === 'MU.10-002') {
+                        const nameMap = { borax: 'สารบอแรกซ์', formalin: 'สารฟอร์มาลิน', bleach: 'สารฟอกขาว', salicylic: 'สารกันรา (กรดซาลิซิลิค)', agonist: 'สารเร่งเนื้อแดง' };
+                        itemTest = mu2Tests.map(k => nameMap[k] || k).join(', ');
+                    } else {
+                        itemTest = defaultTest;
+                    }
+                }
                 if (Array.isArray(itemTest)) itemTest = itemTest.join(', ');
 
                 allItems.push({
-                    uniqueId: `${s.ref_id}_${it.idx || (idx + 1)}`,
-                    itemIdx: it.idx || (idx + 1),
+                    uniqueId: `${s.ref_id}_${itemIdx}`,
+                    itemIdx: itemIdx,
                     ref_id: s.ref_id,
                     form_type: formType,
                     location_name: locationName,
@@ -4663,6 +4694,7 @@ document.getElementById('formNameTitle').innerText = title;
                     sample_name: it.name || s.sample_name || `ตัวอย่างที่ ${idx + 1}`,
                     lab_no: itemLabNo,
                     test_name: itemTest,
+                    mu2Tests: mu2Tests,
                     sample_status: s.status,
                     created_at: s.created_at,
                     rawSample: s
@@ -4681,25 +4713,45 @@ document.getElementById('formNameTitle').innerText = title;
         const provVal = document.getElementById('runSheetFilterProvince') ? document.getElementById('runSheetFilterProvince').value : 'ALL';
         const searchVal = document.getElementById('runSheetSearch') ? document.getElementById('runSheetSearch').value.toLowerCase().trim() : '';
 
-        // Thead header with 9 standard columns
+        // Thead header with dynamic columns (MU.10-002 has 10 columns including 'การแปลผล', others have 9 columns)
         const thead = document.getElementById('runSheetThead');
         if (thead) {
-            thead.innerHTML = `
-                <tr>
-                    <th style="width: 45px; text-align: center; padding: 10px 8px; white-space: nowrap;">
-                        <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
-                    </th>
-                    <th style="width: 50px; text-align: center; padding: 10px 8px; white-space: nowrap;">1. ลำดับ</th>
-                    <th style="width: 95px; text-align: center; padding: 10px 8px; white-space: nowrap;">2. รหัสเอกสาร</th>
-                    <th style="padding: 10px 12px; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
-                    <th style="width: 110px; padding: 10px 10px; white-space: nowrap;">4. อำเภอ</th>
-                    <th style="width: 100px; padding: 10px 10px; white-space: nowrap;">5. จังหวัด</th>
-                    <th style="padding: 10px 12px; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
-                    <th style="width: 85px; text-align: center; padding: 10px 8px; white-space: nowrap;">7. รหัสตัวอย่าง</th>
-                    <th style="width: 140px; padding: 10px 10px; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
-                    <th style="width: 170px; text-align: center; padding: 10px 8px; white-space: nowrap;">9. ผลตรวจ</th>
-                </tr>
-            `;
+            if (formVal === 'MU.10-002') {
+                thead.innerHTML = `
+                    <tr>
+                        <th style="width: 45px; text-align: center; padding: 10px 8px; white-space: nowrap;">
+                            <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
+                        </th>
+                        <th style="width: 50px; text-align: center; padding: 10px 6px; white-space: nowrap;">1. ลำดับ</th>
+                        <th style="width: 90px; text-align: center; padding: 10px 6px; white-space: nowrap;">2. รหัสเอกสาร</th>
+                        <th style="padding: 10px 10px; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 100px; padding: 10px 8px; white-space: nowrap;">4. อำเภอ</th>
+                        <th style="width: 90px; padding: 10px 8px; white-space: nowrap;">5. จังหวัด</th>
+                        <th style="padding: 10px 10px; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
+                        <th style="width: 80px; text-align: center; padding: 10px 6px; white-space: nowrap;">7. รหัสตัวอย่าง</th>
+                        <th style="width: 130px; padding: 10px 8px; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
+                        <th style="min-width: 220px; padding: 10px 8px; white-space: nowrap;">9. การแปลผล</th>
+                        <th style="width: 130px; text-align: center; padding: 10px 8px; white-space: nowrap;">10. ผลตรวจ</th>
+                    </tr>
+                `;
+            } else {
+                thead.innerHTML = `
+                    <tr>
+                        <th style="width: 45px; text-align: center; padding: 10px 8px; white-space: nowrap;">
+                            <input type="checkbox" id="runSheetMasterCheck" onchange="app.toggleRunSheetSelectAll(this.checked)" title="เลือกทั้งหมด" checked>
+                        </th>
+                        <th style="width: 50px; text-align: center; padding: 10px 8px; white-space: nowrap;">1. ลำดับ</th>
+                        <th style="width: 95px; text-align: center; padding: 10px 8px; white-space: nowrap;">2. รหัสเอกสาร</th>
+                        <th style="padding: 10px 12px; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
+                        <th style="width: 110px; padding: 10px 10px; white-space: nowrap;">4. อำเภอ</th>
+                        <th style="width: 100px; padding: 10px 10px; white-space: nowrap;">5. จังหวัด</th>
+                        <th style="padding: 10px 12px; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
+                        <th style="width: 85px; text-align: center; padding: 10px 8px; white-space: nowrap;">7. รหัสตัวอย่าง</th>
+                        <th style="width: 140px; padding: 10px 10px; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
+                        <th style="width: 170px; text-align: center; padding: 10px 8px; white-space: nowrap;">9. ผลตรวจ</th>
+                    </tr>
+                `;
+            }
         }
 
         const allItems = this.getRunSheetAllItems();
@@ -4724,7 +4776,7 @@ document.getElementById('formNameTitle').innerText = title;
 
         tbody.innerHTML = '';
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 32px; color: #64748b; font-weight: 600;">ไม่พบรายการตัวอย่างตามเงื่อนไขที่เลือก</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${formVal === 'MU.10-002' ? '11' : '10'}" style="text-align: center; padding: 32px; color: #64748b; font-weight: 600;">ไม่พบรายการตัวอย่างตามเงื่อนไขที่เลือก</td></tr>`;
             this.updateRunSheetSelectionCount();
             return;
         }
@@ -4735,7 +4787,67 @@ document.getElementById('formNameTitle').innerText = title;
             tr.style.borderBottom = '1px solid #e2e8f0';
             if (index % 2 === 1) tr.style.background = '#f8fafc';
 
-            if (formVal === 'MU.10-001') {
+            if (formVal === 'MU.10-002') {
+                const mu2ChemicalConfig = {
+                    borax: { name: 'สารบอแรกซ์', shortName: 'บอแรกซ์', interp: ['สีแดง', 'สีส้มแดง', 'สีเหลือง'] },
+                    formalin: { name: 'สารฟอร์มาลิน', shortName: 'ฟอร์มาลิน', interp: ['สีชมพู', 'สีแดง', 'สีเหลือง', 'ไม่มีสี'] },
+                    bleach: { name: 'สารฟอกขาว', shortName: 'ฟอกขาว', interp: ['ตะกอนสีเทาดำ', 'สีฟ้า', 'ไม่มีสี'] },
+                    salicylic: { name: 'สารกันรา (กรดซาลิซิลิค)', shortName: 'กันรา', interp: ['สีม่วงดำ', 'สีเหลือง', 'สีเขียว'] },
+                    agonist: { name: 'สารเร่งเนื้อแดง', shortName: 'เร่งเนื้อแดง', interp: ['1 ขีด (Control)', '2 ขีด (Control) และ (Test)'] }
+                };
+
+                const mu2List = item.mu2Tests && item.mu2Tests.length > 0 ? item.mu2Tests : ['borax'];
+                
+                const testCellHtml = mu2List.map(k => {
+                    const cfg = mu2ChemicalConfig[k] || mu2ChemicalConfig.borax;
+                    return `<div><strong style="color:#0284c7;">[ ]</strong> ${cfg.name}</div>`;
+                }).join('<div style="height:3px;"></div>');
+
+                const interpCellHtml = mu2List.map(k => {
+                    const cfg = mu2ChemicalConfig[k] || mu2ChemicalConfig.borax;
+                    const opts = cfg.interp.map(opt => `<span style="margin-right:8px;"><strong style="color:#0284c7;">[ ]</strong> ${opt}</span>`).join('');
+                    return mu2List.length > 1 ? `<div><span style="font-weight:700; color:#475569; margin-right:4px;">${cfg.shortName}:</span> ${opts}</div>` : `<div>${opts}</div>`;
+                }).join('<div style="height:3px;"></div>');
+
+                const resultCellHtml = mu2List.map(() => {
+                    return `
+                        <div style="display: inline-flex; align-items: center; gap: 8px;">
+                            <span><strong style="color:#16a34a;">[ ]</strong> ไม่พบ</span>
+                            <span><strong style="color:#dc2626;">[ ]</strong> พบ</span>
+                        </div>
+                    `;
+                }).join('<div style="height:3px;"></div>');
+
+                tr.innerHTML = `
+                    <td style="text-align: center; padding: 8px;">
+                        <input type="checkbox" class="run-sheet-item-check" data-id="${item.uniqueId}" ${isChecked ? 'checked' : ''} onchange="app.toggleRunSheetItemCheck('${item.uniqueId}', this.checked)">
+                    </td>
+                    <td style="text-align: center; font-weight: 700; color: #64748b; padding: 8px; white-space: nowrap;">${index + 1}</td>
+                    <td style="text-align: center; padding: 8px; white-space: nowrap;">
+                        <span style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 11.5px; font-family: monospace;">
+                            ${item.form_type}
+                        </span>
+                    </td>
+                    <td style="padding: 8px 10px; font-weight: 500; color: #0f172a; white-space: nowrap;">${item.location_name}</td>
+                    <td style="padding: 8px 8px; color: #334155; white-space: nowrap;">${item.district}</td>
+                    <td style="padding: 8px 8px; color: #334155; white-space: nowrap;">${item.province}</td>
+                    <td style="padding: 8px 10px; font-weight: 600; color: #0f172a; white-space: nowrap;">${item.sample_name}</td>
+                    <td style="text-align: center; padding: 8px; white-space: nowrap;">
+                        <span style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-family: monospace; font-size: 13px;">
+                            ${item.lab_no}
+                        </span>
+                    </td>
+                    <td style="padding: 8px 8px; font-size: 11.5px; color: #334155; line-height: 1.4; white-space: nowrap;">
+                        ${testCellHtml}
+                    </td>
+                    <td style="padding: 8px 8px; font-size: 11.5px; color: #334155; line-height: 1.4; white-space: nowrap;">
+                        ${interpCellHtml}
+                    </td>
+                    <td style="padding: 8px 10px; font-size: 11.5px; color: #334155; line-height: 1.4; white-space: nowrap; text-align: center; background: #fafafa;">
+                        ${resultCellHtml}
+                    </td>
+                `;
+            } else if (formVal === 'MU.10-001') {
                 tr.innerHTML = `
                     <td style="text-align: center; padding: 8px;">
                         <input type="checkbox" class="run-sheet-item-check" data-id="${item.uniqueId}" ${isChecked ? 'checked' : ''} onchange="app.toggleRunSheetItemCheck('${item.uniqueId}', this.checked)">
@@ -4770,7 +4882,7 @@ document.getElementById('formNameTitle').innerText = title;
             } else {
                 let resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ผ่าน &nbsp; [ ] ตก</span>';
                 if (item.form_type === 'MU.10-002') {
-                    resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;">[ ] ไม่พบสาร (ผ่าน) &nbsp; [ ] พบสาร (ตก)</span>';
+                    resultDisplay = '<span style="color:#0284c7; font-weight:600; font-size:12px;"><strong style="color:#16a34a;">[ ]</strong> ไม่พบ &nbsp;&nbsp; <strong style="color:#dc2626;">[ ]</strong> พบ</span>';
                 } else if (item.form_type === 'MU.10-003') {
                     resultDisplay = '<div style="font-size:11.5px; line-height:1.3;"><span style="color:#64748b;">ค่าโพลาร์:</span> ____ %<br><strong style="color:#0284c7;">[ ] ≤25% (ผ่าน) &nbsp; [ ] >25% (ตก)</strong></div>';
                 } else if (item.form_type === 'MU.10-004') {
@@ -4787,23 +4899,23 @@ document.getElementById('formNameTitle').innerText = title;
                     <td style="text-align: center; padding: 8px;">
                         <input type="checkbox" class="run-sheet-item-check" data-id="${item.uniqueId}" ${isChecked ? 'checked' : ''} onchange="app.toggleRunSheetItemCheck('${item.uniqueId}', this.checked)">
                     </td>
-                    <td style="text-align: center; font-weight: 700; color: #64748b; padding: 8px;">${index + 1}</td>
-                    <td style="text-align: center; padding: 8px;">
+                    <td style="text-align: center; font-weight: 700; color: #64748b; padding: 8px; white-space: nowrap;">${index + 1}</td>
+                    <td style="text-align: center; padding: 8px; white-space: nowrap;">
                         <span style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 11.5px; font-family: monospace;">
                             ${item.form_type}
                         </span>
                     </td>
-                    <td style="padding: 8px 12px; font-weight: 500; color: #0f172a;">${item.location_name}</td>
-                    <td style="padding: 8px 10px; color: #334155;">${item.district}</td>
-                    <td style="padding: 8px 10px; color: #334155;">${item.province}</td>
-                    <td style="padding: 8px 12px; font-weight: 600; color: #0f172a;">${item.sample_name}</td>
-                    <td style="text-align: center; padding: 8px;">
+                    <td style="padding: 8px 12px; font-weight: 500; color: #0f172a; white-space: nowrap;">${item.location_name}</td>
+                    <td style="padding: 8px 10px; color: #334155; white-space: nowrap;">${item.district}</td>
+                    <td style="padding: 8px 10px; color: #334155; white-space: nowrap;">${item.province}</td>
+                    <td style="padding: 8px 12px; font-weight: 600; color: #0f172a; white-space: nowrap;">${item.sample_name}</td>
+                    <td style="text-align: center; padding: 8px; white-space: nowrap;">
                         <span style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-family: monospace; font-size: 13px;">
                             ${item.lab_no}
                         </span>
                     </td>
-                    <td style="padding: 8px 10px; font-size: 12px; color: #475569;">${item.test_name}</td>
-                    <td style="text-align: center; padding: 8px; background: #fafafa;">
+                    <td style="padding: 8px 10px; font-size: 12px; color: #475569; white-space: nowrap;">${item.test_name}</td>
+                    <td style="text-align: center; padding: 8px; background: #fafafa; white-space: nowrap;">
                         ${resultDisplay}
                     </td>
                 `;
@@ -4874,8 +4986,62 @@ document.getElementById('formNameTitle').innerText = title;
         const printDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
         const isMu001 = formVal === 'MU.10-001';
+        const isMu002 = formVal === 'MU.10-002';
 
         const rowsHtml = selectedItems.map((item, idx) => {
+            if (isMu002) {
+                const mu2ChemicalConfig = {
+                    borax: { name: 'สารบอแรกซ์', shortName: 'บอแรกซ์', interp: ['สีแดง', 'สีส้มแดง', 'สีเหลือง'] },
+                    formalin: { name: 'สารฟอร์มาลิน', shortName: 'ฟอร์มาลิน', interp: ['สีชมพู', 'สีแดง', 'สีเหลือง', 'ไม่มีสี'] },
+                    bleach: { name: 'สารฟอกขาว', shortName: 'ฟอกขาว', interp: ['ตะกอนสีเทาดำ', 'สีฟ้า', 'ไม่มีสี'] },
+                    salicylic: { name: 'สารกันรา (กรดซาลิซิลิค)', shortName: 'กันรา', interp: ['สีม่วงดำ', 'สีเหลือง', 'สีเขียว'] },
+                    agonist: { name: 'สารเร่งเนื้อแดง', shortName: 'เร่งเนื้อแดง', interp: ['1 ขีด (Control)', '2 ขีด (Control) และ (Test)'] }
+                };
+
+                const mu2List = item.mu2Tests && item.mu2Tests.length > 0 ? item.mu2Tests : ['borax'];
+
+                const testCellHtml = mu2List.map(k => {
+                    const cfg = mu2ChemicalConfig[k] || mu2ChemicalConfig.borax;
+                    return `<div>[ &nbsp; ] ${cfg.name}</div>`;
+                }).join('<div style="height:2px;"></div>');
+
+                const interpCellHtml = mu2List.map(k => {
+                    const cfg = mu2ChemicalConfig[k] || mu2ChemicalConfig.borax;
+                    const opts = cfg.interp.map(opt => `<span>[ &nbsp; ] ${opt}</span>`).join('&nbsp;&nbsp;');
+                    return mu2List.length > 1 ? `<div><span style="font-weight:bold;">${cfg.shortName}:</span> ${opts}</div>` : `<div>${opts}</div>`;
+                }).join('<div style="height:2px;"></div>');
+
+                const resultCellHtml = mu2List.map(() => {
+                    return `
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                            <span>[ &nbsp; ] ไม่พบ</span>
+                            <span>[ &nbsp; ] พบ</span>
+                        </div>
+                    `;
+                }).join('<div style="height:2px;"></div>');
+
+                return `
+                    <tr style="page-break-inside: avoid; border-bottom: 1px solid #333;">
+                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-weight: bold; font-size: 11pt; white-space: nowrap;">${idx + 1}</td>
+                        <td style="border: 1px solid #333; padding: 5px 4px; text-align: center; font-family: monospace; font-weight: bold; font-size: 10.5pt; white-space: nowrap;">${item.form_type}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; line-height: 1.2; white-space: nowrap;">${item.location_name}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; white-space: nowrap;">${item.district}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 11pt; white-space: nowrap;">${item.province}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-weight: 600; font-size: 11pt; line-height: 1.2; white-space: nowrap;">${item.sample_name}</td>
+                        <td style="border: 1px solid #333; padding: 5px 3px; text-align: center; font-family: monospace; font-weight: bold; font-size: 12pt; white-space: nowrap;">${item.lab_no}</td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10pt; line-height: 1.3; white-space: nowrap;">
+                            ${testCellHtml}
+                        </td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 9.5pt; line-height: 1.3; white-space: nowrap;">
+                            ${interpCellHtml}
+                        </td>
+                        <td style="border: 1px solid #333; padding: 5px 6px; font-size: 10pt; line-height: 1.3; white-space: nowrap; text-align: center;">
+                            ${resultCellHtml}
+                        </td>
+                    </tr>
+                `;
+            }
+
             if (isMu001) {
                 return `
                     <tr style="page-break-inside: avoid; border-bottom: 1px solid #333;">
@@ -4910,8 +5076,8 @@ document.getElementById('formNameTitle').innerText = title;
             if (item.form_type === 'MU.10-002') {
                 resultCell = `
                     <div style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10.5pt;">
-                        <span>[ &nbsp; ] ไม่พบ (ผ่าน)</span>
-                        <span>[ &nbsp; ] พบสาร (ตก)</span>
+                        <span>[ &nbsp; ] ไม่พบ</span>
+                        <span>[ &nbsp; ] พบ</span>
                     </div>
                 `;
             } else if (item.form_type === 'MU.10-003') {
@@ -4968,21 +5134,41 @@ document.getElementById('formNameTitle').innerText = title;
             `;
         }).join('');
 
-        const tableHeadHtml = `
-            <thead>
-                <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 11.5pt;">
-                    <th style="border: 1px solid #000; padding: 6px 3px; width: 35px; text-align: center; white-space: nowrap;">1. ลำดับ</th>
-                    <th style="border: 1px solid #000; padding: 6px 4px; width: 75px; text-align: center; white-space: nowrap;">2. รหัสเอกสาร</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; width: 90px; text-align: left; white-space: nowrap;">4. อำเภอ</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; width: 85px; text-align: left; white-space: nowrap;">5. จังหวัด</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 6px 4px; width: 70px; text-align: center; white-space: nowrap;">7. รหัสตัวอย่าง</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; width: 140px; text-align: left; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
-                    <th style="border: 1px solid #000; padding: 6px 6px; width: 175px; text-align: center; white-space: nowrap;">9. ผลตรวจ</th>
-                </tr>
-            </thead>
-        `;
+        let tableHeadHtml = '';
+        if (isMu002) {
+            tableHeadHtml = `
+                <thead>
+                    <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 11pt;">
+                        <th style="border: 1px solid #000; padding: 6px 3px; width: 32px; text-align: center; white-space: nowrap;">1. ลำดับ</th>
+                        <th style="border: 1px solid #000; padding: 6px 4px; width: 68px; text-align: center; white-space: nowrap;">2. รหัสเอกสาร</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 85px; text-align: left; white-space: nowrap;">4. อำเภอ</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 80px; text-align: left; white-space: nowrap;">5. จังหวัด</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
+                        <th style="border: 1px solid #000; padding: 6px 4px; width: 65px; text-align: center; white-space: nowrap;">7. รหัสตัวอย่าง</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 120px; text-align: left; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 185px; text-align: left; white-space: nowrap;">9. การแปลผล</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 105px; text-align: center; white-space: nowrap;">10. ผลตรวจ</th>
+                    </tr>
+                </thead>
+            `;
+        } else {
+            tableHeadHtml = `
+                <thead>
+                    <tr style="background: #f1f5f9; border-bottom: 1.5px solid #000; font-size: 11.5pt;">
+                        <th style="border: 1px solid #000; padding: 6px 3px; width: 35px; text-align: center; white-space: nowrap;">1. ลำดับ</th>
+                        <th style="border: 1px solid #000; padding: 6px 4px; width: 75px; text-align: center; white-space: nowrap;">2. รหัสเอกสาร</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">3. สถานที่เก็บตัวอย่าง</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 90px; text-align: left; white-space: nowrap;">4. อำเภอ</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 85px; text-align: left; white-space: nowrap;">5. จังหวัด</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; text-align: left; white-space: nowrap;">6. ชื่อตัวอย่าง</th>
+                        <th style="border: 1px solid #000; padding: 6px 4px; width: 70px; text-align: center; white-space: nowrap;">7. รหัสตัวอย่าง</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 140px; text-align: left; white-space: nowrap;">8. ชุดทดสอบที่ตรวจ</th>
+                        <th style="border: 1px solid #000; padding: 6px 6px; width: 175px; text-align: center; white-space: nowrap;">9. ผลตรวจ</th>
+                    </tr>
+                </thead>
+            `;
+        }
 
         const htmlContent = `
             <div style="font-family: 'TH SarabunPSK', 'TH Sarabun New', 'Sarabun', sans-serif; padding: 6mm 6mm; color: #000; box-sizing: border-box;">
