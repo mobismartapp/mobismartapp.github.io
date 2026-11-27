@@ -13437,6 +13437,17 @@ const btnApprove = document.getElementById('btnApproveAndSign');
         }
     },
 
+    getAppBaseUrl() {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('anchasa241138') || window.location.hostname.includes('github.io')) {
+            return 'https://mobismartapp.github.io/';
+        }
+        let path = window.location.pathname;
+        if (!path.endsWith('/') && !path.endsWith('.html')) {
+            path += '/';
+        }
+        return window.location.origin + path;
+    },
+
     openProvincialEmailModal(targetProv = 'อุบลราชธานี') {
         if (!this.currentUser || !['admin', 'lab', 'certifier'].includes(this.currentUser.role)) {
             Swal.fire({
@@ -14134,17 +14145,7 @@ const btnApprove = document.getElementById('btnApproveAndSign');
             countBadge.innerText = `สรุป ${totalReports} ใบงาน`;
         }
 
-        const getBaseUrl = () => {
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                return 'https://anchasa241138-dotcom.github.io/MU10EazyAppversion2026/';
-            }
-            let path = window.location.pathname;
-            if (!path.endsWith('/') && !path.endsWith('.html')) {
-                path += '/';
-            }
-            return window.location.origin + path;
-        };
-        const baseUrl = getBaseUrl();
+        const baseUrl = this.getAppBaseUrl();
 
         // Build HTML Table rows
         let rowsHtml = '';
@@ -14341,6 +14342,7 @@ const btnApprove = document.getElementById('btnApproveAndSign');
             const primaryEmail = emailList[0] || 'anchasa.241138@gmail.com';
             const ccEmails = emailList.slice(1).join(', ');
 
+            const baseUrl = this.getAppBaseUrl();
             const payload = {
                 _subject: subject,
                 _replyto: 'noreply@mu10-smartlab.moph.go.th',
@@ -14350,7 +14352,7 @@ const btnApprove = document.getElementById('btnApproveAndSign');
                 subject: subject,
                 "หัวข้อรายงาน": subject,
                 "เนื้อหารายงาน": "ขอส่งรายงานผลตรวจวิเคราะห์ความปลอดภัยด้านอาหาร ประจำรอบการตรวจ โปรดตรวจสอบรายละเอียดในเอกสารแนบ",
-                "ลิงก์เข้าสู่ระบบ": `${window.location.origin}${window.location.pathname}#download-results`,
+                "ลิงก์เข้าสู่ระบบ": `${baseUrl}#download-results`,
                 html: htmlBody
             };
 
