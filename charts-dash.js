@@ -2221,13 +2221,19 @@ function updateStrategicKPITargets(allSamples, curProv = 'all', targetSubstance 
     if (!Array.isArray(allSamples)) return;
     const targetConfig = window.STRATEGIC_TARGETS_2570;
 
-    // Helper to count individual test items matching targetSubstance
+    // Helper to count individual test items matching targetSubstance (เฉพาะตัวอย่างที่ตรวจวิเคราะห์และอนุมัติผลเสร็จสิ้นแล้ว)
     const countTestItems = (sampleList) => {
         let count = 0;
         (sampleList || []).forEach(s => {
+            // แนวทางที่ 3: นับเฉพาะตัวอย่างที่ตรวจวิเคราะห์เสร็จสิ้นและอนุมัติผลแล้ว
+            if (s.status !== 'approved' && s.status !== 'completed') return;
             let idx = 1;
             let hasItems = false;
             while (s['sample_name_' + idx] !== undefined && idx <= 50) {
+                if (typeof window.isItemValid === 'function' && !window.isItemValid(s, idx)) {
+                    idx++;
+                    continue;
+                }
                 hasItems = true;
                 if (window.itemMatchesSubstance(s, idx, targetSubstance)) count++;
                 idx++;
